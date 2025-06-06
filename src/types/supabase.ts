@@ -1,0 +1,79 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export interface Database {
+  public: {
+    Tables: {
+      orders: {
+        Row: {
+          id: string
+          accession_id: string
+          status: string
+          organization: string
+          location: string
+          provider: string
+          patient_name: string
+          request_date: string
+          collection_date: string
+          received_date: string | null
+          finalized_date: string | null
+          test_method: string
+          order_panels: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          accession_id: string
+          status: string
+          organization: string
+          location: string
+          provider: string
+          patient_name: string
+          request_date: string
+          collection_date: string
+          received_date?: string | null
+          finalized_date?: string | null
+          test_method: string
+          order_panels: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          accession_id?: string
+          status?: string
+          organization?: string
+          location?: string
+          provider?: string
+          patient_name?: string
+          request_date?: string
+          collection_date?: string
+          received_date?: string | null
+          finalized_date?: string | null
+          test_method?: string
+          order_panels?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}

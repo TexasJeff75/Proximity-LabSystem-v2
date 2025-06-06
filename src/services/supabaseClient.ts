@@ -1,16 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import { Database } from '../types/supabase';
 
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase environment variables are not set. Please check your .env file.');
+  console.error('Supabase URL or Anon Key is missing. Please check your .env file.');
 }
 
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   supabaseUrl || '',
   supabaseAnonKey || ''
 );
-
-export default supabase;
