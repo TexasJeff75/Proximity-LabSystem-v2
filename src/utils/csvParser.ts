@@ -9,8 +9,8 @@ export const parseCSVToOrders = (csvData: string): OrderInsert[] => {
   const orders: OrderInsert[] = [];
   
   dataRows.forEach((row, index) => {
-    // Split by comma but respect quoted values
-    const columns = row.split(',').map(col => col.trim());
+    // Parse CSV row properly handling quoted fields
+    const columns = parseCSVRow(row);
     
     if (columns.length >= 12) {
       // Extract values from columns
@@ -19,7 +19,7 @@ export const parseCSVToOrders = (csvData: string): OrderInsert[] => {
       const organization = columns[2].trim();
       const location = columns[3].trim();
       const provider = columns[4].trim();
-      const patientName = columns[5].trim().replace(/"/g, '').trim();
+      const patientName = columns[5].trim();
       
       // Parse required date fields
       const requestDate = formatDate(columns[6].trim());
@@ -60,6 +60,43 @@ export const parseCSVToOrders = (csvData: string): OrderInsert[] => {
   });
   
   return orders;
+};
+
+// Proper CSV row parser that handles quoted fields
+const parseCSVRow = (row: string): string[] => {
+  const columns: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let i = 0;
+  
+  while (i < row.length) {
+    const char = row[i];
+    
+    if (char === '"') {
+      if (inQuotes && row[i + 1] === '"') {
+        // Handle escaped quotes ("")
+        current += '"';
+        i += 2;
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+        i++;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // End of field
+      columns.push(current.trim());
+      current = '';
+      i++;
+    } else {
+      current += char;
+      i++;
+    }
+  }
+  
+  // Add the last column
+  columns.push(current.trim());
+  
+  return columns;
 };
 
 // Helper function to format date strings to ISO format
