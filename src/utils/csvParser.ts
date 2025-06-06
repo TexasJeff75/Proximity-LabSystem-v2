@@ -8,7 +8,7 @@ export const parseCSVToOrders = (csvData: string): OrderInsert[] => {
   
   const orders: OrderInsert[] = [];
   
-  dataRows.forEach(row => {
+  dataRows.forEach((row, index) => {
     // Split by comma but respect quoted values
     const columns = row.split(',').map(col => col.trim());
     
@@ -20,8 +20,20 @@ export const parseCSVToOrders = (csvData: string): OrderInsert[] => {
       const location = columns[3].trim();
       const provider = columns[4].trim();
       const patientName = columns[5].trim().replace(/"/g, '').trim();
+      
+      // Parse required date fields
       const requestDate = formatDate(columns[6].trim());
       const collectionDate = formatDate(columns[7].trim());
+      
+      // Check if required dates are valid
+      if (!requestDate) {
+        throw new Error(`Invalid request_date format in row ${index + 2}: "${columns[6].trim()}"`);
+      }
+      if (!collectionDate) {
+        throw new Error(`Invalid collection_date format in row ${index + 2}: "${columns[7].trim()}"`);
+      }
+      
+      // Parse optional date fields
       const receivedDate = columns[8].trim() ? formatDate(columns[8].trim()) : null;
       const finalizedDate = columns[9].trim() ? formatDate(columns[9].trim()) : null;
       const testMethod = columns[10].trim();
@@ -51,8 +63,8 @@ export const parseCSVToOrders = (csvData: string): OrderInsert[] => {
 };
 
 // Helper function to format date strings to ISO format
-const formatDate = (dateStr: string): string => {
-  if (!dateStr) return '';
+const formatDate = (dateStr: string): string | null => {
+  if (!dateStr) return null;
   
   // Parse date in format MM/DD/YYYY HH:MM AM/PM
   const match = dateStr.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})\s+(AM|PM)/);
@@ -72,5 +84,6 @@ const formatDate = (dateStr: string): string => {
     return `${year}-${month}-${day}T${hour.toString().padStart(2, '0')}:${minutes}:00`;
   }
   
-  return dateStr;
+  // Return null for invalid date formats instead of the original string
+  return null;
 };
