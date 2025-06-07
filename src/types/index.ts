@@ -1,7 +1,7 @@
 // Common types used throughout the application
 
 // Organization related types
-export interface Organization {
+interface Organization {
   id: string;
   org_code: string;
   name: string;
@@ -76,7 +76,7 @@ export interface Provider {
   orderCount?: number;
 }
 
-export interface EducationItem {
+interface EducationItem {
   degree: string;
   institution: string;
   year: string;
@@ -220,7 +220,7 @@ export interface Message {
   read: boolean;
 }
 
-export interface MessagingContextType {
+interface MessagingContextType {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   messages: Message[];
@@ -290,7 +290,7 @@ export interface DevelopmentLogEntry {
 }
 
 // Raw data types for Supabase integration
-export interface RawOrderData {
+interface RawOrderData {
   accession_id: string;
   status: string;
   organization: string;
@@ -306,6 +306,6 @@ export interface RawOrderData {
 }
 
 // Utility types
-export type StatusType = 'Ready' | 'Running' | 'Maintenance' | 'Error' | 'Active' | 'Draft' | 'Completed' | 'Pending' | 'In Progress' | 'Rejected' | 'Cancelled' | 'Final' | 'Prelim' | 'Prelim (Review)' | 'Final (Review)';
+type StatusType = 'Ready' | 'Running' | 'Maintenance' | 'Error' | 'Active' | 'Draft' | 'Completed' | 'Pending' | 'In Progress' | 'Rejected' | 'Cancelled' | 'Final' | 'Prelim' | 'Prelim (Review)' | 'Final (Review)';
 
-export type PriorityType = 'High' | 'Normal' | 'Urgent' | 'Low';
+type PriorityType = 'High' | 'Normal' | 'Urgent' | 'Low';

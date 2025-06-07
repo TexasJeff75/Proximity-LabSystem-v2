@@ -17,7 +17,7 @@ import {
 } from '../types';
 
 // Mock locations data
-export const locations: Location[] = [
+const locations: Location[] = [
   {
     id: 'LOC001',
     name: 'Metro Health Downtown',
@@ -66,7 +66,7 @@ export const locations: Location[] = [
 ];
 
 // Mock providers data
-export const providers: Provider[] = [
+const providers: Provider[] = [
   {
     id: 'PROV001',
     name: 'Dr. Sarah Johnson',
@@ -227,7 +227,7 @@ export const providers: Provider[] = [
 ];
 
 // Mock staff data
-export const staff: Staff[] = [
+const staff: Staff[] = [
   {
     id: 'STAFF001',
     name: 'Jennifer Adams',
@@ -271,7 +271,7 @@ export const staff: Staff[] = [
 ];
 
 // Mock samples data
-export const samples: Sample[] = [
+const samples: Sample[] = [
   {
     id: 'S001',
     patientName: 'John Doe',
@@ -345,7 +345,7 @@ export const samples: Sample[] = [
 ];
 
 // Mock patient details data
-export const patientDetailsData: Record<string, PatientDetails> = {
+const patientDetailsData: Record<string, PatientDetails> = {
   P001: {
     id: 'P001',
     firstName: 'John',
@@ -569,7 +569,7 @@ export const patientDetailsData: Record<string, PatientDetails> = {
 };
 
 // Mock robots data
-export const robots: Robot[] = [
+const robots: Robot[] = [
   {
     id: 'OT2-001',
     name: 'Opentrons OT-2 Alpha',
@@ -602,7 +602,7 @@ export const robots: Robot[] = [
 ];
 
 // Mock protocols data
-export const protocols: Protocol[] = [
+const protocols: Protocol[] = [
   {
     id: 'P001',
     name: 'DNA Extraction Protocol',
@@ -662,7 +662,7 @@ export const protocols: Protocol[] = [
 ];
 
 // Mock run history data
-export const runHistory: RunHistory[] = [
+const runHistory: RunHistory[] = [
   {
     id: 'R001',
     protocol: 'DNA Extraction Protocol',
@@ -702,7 +702,7 @@ export const runHistory: RunHistory[] = [
 ];
 
 // Mock reports data
-export const reports: Report[] = [
+const reports: Report[] = [
   {
     id: 'R001',
     title: 'Daily Lab Summary',
@@ -746,7 +746,7 @@ export const reports: Report[] = [
 ];
 
 // Mock messages data
-export const mockMessages: Message[] = [
+const mockMessages: Message[] = [
   {
     id: '1',
     sampleId: 'S001',
@@ -800,7 +800,7 @@ export const mockMessages: Message[] = [
 ];
 
 // Mock roles data
-export const roles: Role[] = [
+const roles: Role[] = [
   {
     id: 'ROLE001',
     name: 'Administrator',
@@ -984,7 +984,7 @@ export const roles: Role[] = [
 ];
 
 // Mock audit logs
-export const auditLogs: AuditLog[] = [
+const auditLogs: AuditLog[] = [
   {
     id: 'LOG001',
     timestamp: '2024-01-15 09:23:45',
@@ -1038,7 +1038,7 @@ export const auditLogs: AuditLog[] = [
 ];
 
 // Mock feature requests data
-export const featureRequests: FeatureRequest[] = [
+const featureRequests: FeatureRequest[] = [
   {
     id: 'FR001',
     title: 'Batch Sample Processing',
@@ -1102,7 +1102,7 @@ export const featureRequests: FeatureRequest[] = [
 ];
 
 // Mock tests data
-export const tests: Test[] = [
+const tests: Test[] = [
   {
     id: 'T001',
     name: 'Complete Blood Count',
@@ -1451,7 +1451,7 @@ export const developmentLog: DevelopmentLogEntry[] = [
 ];
 
 // Simulated user data
-export const currentUser = {
+const currentUser = {
   name: 'Sarah Johnson',
   email: 'sarah.johnson@labsystem.com',
   role: 'Administrator',
@@ -1459,7 +1459,7 @@ export const currentUser = {
 };
 
 // Navigation menu items
-export const menuItems = [
+const menuItems = [
   { path: '/', label: 'Dashboard', icon: 'HomeIcon' },
   { path: '/organizations', label: 'Organizations', icon: 'BuildingIcon' },
   { path: '/samples', label: 'Orders', icon: 'TestTubeIcon' },

@@ -1,17 +1,17 @@
 import { supabase } from './supabaseClient';
 import { Database } from '../types/supabase';
 
-export type TestMethod = Database['public']['Tables']['test_methods']['Row'];
-export type TestMethodInsert = Database['public']['Tables']['test_methods']['Insert'];
+type TestMethod = Database['public']['Tables']['test_methods']['Row'];
+type TestMethodInsert = Database['public']['Tables']['test_methods']['Insert'];
 
 // Extended test method type that includes panels
 export interface TestMethodWithPanels extends TestMethod {
   test_panels?: TestPanel[];
 }
 
-export type TestPanel = Database['public']['Tables']['test_panels']['Row'];
+type TestPanel = Database['public']['Tables']['test_panels']['Row'];
 
-export const fetchTestMethods = async (): Promise<TestMethod[]> => {
+const fetchTestMethods = async (): Promise<TestMethod[]> => {
   const { data, error } = await supabase
     .from('test_methods')
     .select('*')
@@ -49,7 +49,7 @@ export const fetchTestMethodsWithPanels = async (): Promise<TestMethodWithPanels
   return data || [];
 };
 
-export const fetchTestMethodsByOrganization = async (organizationId: string): Promise<TestMethodWithPanels[]> => {
+const fetchTestMethodsByOrganization = async (organizationId: string): Promise<TestMethodWithPanels[]> => {
   const { data, error } = await supabase
     .from('test_methods')
     .select(`
@@ -74,7 +74,7 @@ export const fetchTestMethodsByOrganization = async (organizationId: string): Pr
   return data || [];
 };
 
-export const insertTestMethod = async (testMethod: TestMethodInsert): Promise<TestMethod> => {
+const insertTestMethod = async (testMethod: TestMethodInsert): Promise<TestMethod> => {
   const { data, error } = await supabase
     .from('test_methods')
     .insert(testMethod)
@@ -117,7 +117,7 @@ export const deleteTestMethod = async (id: string): Promise<void> => {
   }
 };
 
-export const getTestMethodByName = async (organizationId: string, name: string): Promise<TestMethod | null> => {
+const getTestMethodByName = async (organizationId: string, name: string): Promise<TestMethod | null> => {
   const { data, error } = await supabase
     .from('test_methods')
     .select('*')

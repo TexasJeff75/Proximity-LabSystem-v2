@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { PlayIcon, PauseIcon, RefreshCwIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon, SettingsIcon, UploadIcon, DownloadIcon, CpuIcon, ThermometerIcon, DropletIcon } from 'lucide-react';
+import { PlayIcon, PauseIcon, RefreshCwIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon, SettingsIcon, UploadIcon, DownloadIcon, CpuIcon, ThermometerIcon, DropletIcon, ScanIcon, PrinterIcon } from 'lucide-react';
+import { BarcodeScanner } from '../components/BarcodeScanner';
+import { BarcodeGenerator } from '../components/BarcodeGenerator';
+import { WorkflowTracker } from '../components/WorkflowTracker';
+
 const robots = [{
   id: 'OT2-001',
   name: 'Opentrons OT-2 Alpha',
@@ -27,6 +31,7 @@ const robots = [{
   pipettes: ['Flex 1-Channel 1000μL', 'Flex 8-Channel 50μL'],
   temperature: '21°C'
 }];
+
 const protocols = [{
   id: 'P001',
   name: 'DNA Extraction Protocol',
@@ -60,6 +65,7 @@ const protocols = [{
   status: 'Draft',
   lastRun: '2024-01-12'
 }];
+
 const runHistory = [{
   id: 'R001',
   protocol: 'DNA Extraction Protocol',
@@ -93,8 +99,13 @@ const runHistory = [{
   status: 'Completed',
   samples: 48
 }];
+
 export function Automation() {
   const [selectedTab, setSelectedTab] = useState('robots');
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [showBarcodeGenerator, setShowBarcodeGenerator] = useState(false);
+  const [scanResult, setScanResult] = useState<any>(null);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Ready':
@@ -115,6 +126,7 @@ export function Automation() {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'Ready':
@@ -129,7 +141,17 @@ export function Automation() {
         return <ClockIcon className="h-4 w-4" />;
     }
   };
-  return <div className="p-6 w-full">
+
+  const handleScanSuccess = (result: any) => {
+    setScanResult(result);
+    // Auto-close scanner after successful scan
+    setTimeout(() => {
+      setShowBarcodeScanner(false);
+    }, 2000);
+  };
+
+  return (
+    <div className="p-6 w-full">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -141,6 +163,20 @@ export function Automation() {
             </p>
           </div>
           <div className="flex space-x-3">
+            <button 
+              onClick={() => setShowBarcodeScanner(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700"
+            >
+              <ScanIcon className="h-4 w-4" />
+              <span>Scan Barcode</span>
+            </button>
+            <button 
+              onClick={() => setShowBarcodeGenerator(true)}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-purple-700"
+            >
+              <PrinterIcon className="h-4 w-4" />
+              <span>Generate Barcodes</span>
+            </button>
             <button className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-50">
               <UploadIcon className="h-4 w-4" />
               <span>Upload Protocol</span>
@@ -151,34 +187,63 @@ export function Automation() {
             </button>
           </div>
         </div>
+
+        {/* Recent Scan Result */}
+        {scanResult && (
+          <div className={`mb-4 p-3 rounded-lg border ${
+            scanResult.success 
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-red-50 border-red-200'
+          }`}>
+            <div className="flex items-center space-x-2">
+              {scanResult.success ? (
+                <CheckCircleIcon className="h-5 w-5 text-green-500" />
+              ) : (
+                <AlertCircleIcon className="h-5 w-5 text-red-500" />
+              )}
+              <p className={`text-sm font-medium ${
+                scanResult.success ? 'text-green-800' : 'text-red-800'
+              }`}>
+                Last Scan: {scanResult.message}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Tab Navigation */}
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
-            {[{
-            key: 'robots',
-            label: 'Robots',
-            icon: CpuIcon
-          }, {
-            key: 'protocols',
-            label: 'Protocols',
-            icon: ClockIcon
-          }, {
-            key: 'history',
-            label: 'Run History',
-            icon: RefreshCwIcon
-          }].map(tab => {
-            const Icon = tab.icon;
-            return <button key={tab.key} onClick={() => setSelectedTab(tab.key)} className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${selectedTab === tab.key ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+            {[
+              { key: 'robots', label: 'Robots', icon: CpuIcon },
+              { key: 'protocols', label: 'Protocols', icon: ClockIcon },
+              { key: 'workflow', label: 'Workflow Tracking', icon: RefreshCwIcon },
+              { key: 'history', label: 'Run History', icon: RefreshCwIcon }
+            ].map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setSelectedTab(tab.key)}
+                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                    selectedTab === tab.key
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
                   <Icon className="h-4 w-4" />
                   <span>{tab.label}</span>
-                </button>;
-          })}
+                </button>
+              );
+            })}
           </nav>
         </div>
       </div>
+
       {/* Robots Tab */}
-      {selectedTab === 'robots' && <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {robots.map(robot => <div key={robot.id} className="bg-white rounded-lg shadow-sm border p-6">
+      {selectedTab === 'robots' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {robots.map(robot => (
+            <div key={robot.id} className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-blue-100 rounded-lg">
@@ -196,7 +261,9 @@ export function Automation() {
                   <span>{robot.status}</span>
                 </span>
               </div>
-              {robot.status === 'Running' && robot.currentProtocol && <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+
+              {robot.status === 'Running' && robot.currentProtocol && (
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium text-blue-900">
                       {robot.currentProtocol}
@@ -206,14 +273,17 @@ export function Automation() {
                     </span>
                   </div>
                   <div className="w-full bg-blue-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{
-              width: `${robot.progress}%`
-            }}></div>
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${robot.progress}%` }}
+                    ></div>
                   </div>
                   <p className="text-xs text-blue-700 mt-1">
                     {robot.estimatedTime}
                   </p>
-                </div>}
+                </div>
+              )}
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">Temperature:</span>
@@ -222,22 +292,28 @@ export function Automation() {
                     <span className="text-gray-900">{robot.temperature}</span>
                   </div>
                 </div>
+
                 <div className="text-sm">
                   <span className="text-gray-500">Pipettes:</span>
                   <div className="mt-1 space-y-1">
-                    {robot.pipettes.map((pipette, index) => <div key={index} className="flex items-center space-x-2">
+                    {robot.pipettes.map((pipette, index) => (
+                      <div key={index} className="flex items-center space-x-2">
                         <DropletIcon className="h-3 w-3 text-gray-400" />
                         <span className="text-gray-700 text-xs">{pipette}</span>
-                      </div>)}
+                      </div>
+                    ))}
                   </div>
                 </div>
+
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">Last Calibration:</span>
                   <span className="text-gray-900">{robot.lastCalibration}</span>
                 </div>
               </div>
+
               <div className="mt-4 pt-4 border-t flex space-x-2">
-                {robot.status === 'Running' ? <>
+                {robot.status === 'Running' ? (
+                  <>
                     <button className="flex-1 bg-yellow-100 text-yellow-800 py-2 px-3 rounded-lg text-sm font-medium hover:bg-yellow-200 flex items-center justify-center space-x-1">
                       <PauseIcon className="h-4 w-4" />
                       <span>Pause</span>
@@ -246,7 +322,9 @@ export function Automation() {
                       <div className="h-4 w-4" />
                       <span>Stop</span>
                     </button>
-                  </> : <>
+                  </>
+                ) : (
+                  <>
                     <button className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center justify-center space-x-1">
                       <PlayIcon className="h-4 w-4" />
                       <span>Start</span>
@@ -254,12 +332,17 @@ export function Automation() {
                     <button className="bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200">
                       <SettingsIcon className="h-4 w-4" />
                     </button>
-                  </>}
+                  </>
+                )}
               </div>
-            </div>)}
-        </div>}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Protocols Tab */}
-      {selectedTab === 'protocols' && <div className="bg-white rounded-lg shadow-sm border">
+      {selectedTab === 'protocols' && (
+        <div className="bg-white rounded-lg shadow-sm border">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
@@ -285,7 +368,8 @@ export function Automation() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {protocols.map(protocol => <tr key={protocol.id} className="hover:bg-gray-50">
+                {protocols.map(protocol => (
+                  <tr key={protocol.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
@@ -321,13 +405,22 @@ export function Automation() {
                         <DownloadIcon className="h-4 w-4" />
                       </button>
                     </td>
-                  </tr>)}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </div>}
+        </div>
+      )}
+
+      {/* Workflow Tracking Tab */}
+      {selectedTab === 'workflow' && (
+        <WorkflowTracker />
+      )}
+
       {/* Run History Tab */}
-      {selectedTab === 'history' && <div className="bg-white rounded-lg shadow-sm border">
+      {selectedTab === 'history' && (
+        <div className="bg-white rounded-lg shadow-sm border">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
@@ -359,7 +452,8 @@ export function Automation() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {runHistory.map(run => <tr key={run.id} className="hover:bg-gray-50">
+                {runHistory.map(run => (
+                  <tr key={run.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {run.id}
                     </td>
@@ -391,10 +485,28 @@ export function Automation() {
                         Export
                       </button>
                     </td>
-                  </tr>)}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </div>}
-    </div>;
+        </div>
+      )}
+
+      {/* Barcode Scanner Modal */}
+      {showBarcodeScanner && (
+        <BarcodeScanner
+          onClose={() => setShowBarcodeScanner(false)}
+          onScanSuccess={handleScanSuccess}
+        />
+      )}
+
+      {/* Barcode Generator Modal */}
+      {showBarcodeGenerator && (
+        <BarcodeGenerator
+          onClose={() => setShowBarcodeGenerator(false)}
+        />
+      )}
+    </div>
+  );
 }

@@ -4,7 +4,7 @@ import { Database } from '../types/supabase';
 export type TestPanel = Database['public']['Tables']['test_panels']['Row'];
 export type TestPanelInsert = Database['public']['Tables']['test_panels']['Insert'];
 
-export const fetchTestPanels = async (): Promise<TestPanel[]> => {
+const fetchTestPanels = async (): Promise<TestPanel[]> => {
   const { data, error } = await supabase
     .from('test_panels')
     .select('*')
@@ -18,7 +18,7 @@ export const fetchTestPanels = async (): Promise<TestPanel[]> => {
   return data || [];
 };
 
-export const fetchTestPanelsByMethod = async (testMethodId: string): Promise<TestPanel[]> => {
+const fetchTestPanelsByMethod = async (testMethodId: string): Promise<TestPanel[]> => {
   const { data, error } = await supabase
     .from('test_panels')
     .select('*')
@@ -76,7 +76,7 @@ export const deleteTestPanel = async (id: string): Promise<void> => {
   }
 };
 
-export const getTestPanelByCode = async (testMethodId: string, panelCode: string): Promise<TestPanel | null> => {
+const getTestPanelByCode = async (testMethodId: string, panelCode: string): Promise<TestPanel | null> => {
   const { data, error } = await supabase
     .from('test_panels')
     .select('*')

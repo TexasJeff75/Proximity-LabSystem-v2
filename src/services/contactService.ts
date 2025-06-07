@@ -4,7 +4,7 @@ import { Database } from '../types/supabase';
 export type Contact = Database['public']['Tables']['contacts']['Row'];
 export type ContactInsert = Database['public']['Tables']['contacts']['Insert'];
 
-export const fetchContacts = async (): Promise<Contact[]> => {
+const fetchContacts = async (): Promise<Contact[]> => {
   const { data, error } = await supabase
     .from('contacts')
     .select('*')
@@ -78,7 +78,7 @@ export const deleteContact = async (id: string): Promise<void> => {
   }
 };
 
-export const getContactByNPI = async (providerNPI: string): Promise<Contact | null> => {
+const getContactByNPI = async (providerNPI: string): Promise<Contact | null> => {
   const { data, error } = await supabase
     .from('contacts')
     .select('*')

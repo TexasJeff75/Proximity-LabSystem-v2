@@ -13,7 +13,7 @@ export interface LocationWithOrganization extends Location {
   } | null;
 }
 
-export const fetchLocations = async (): Promise<Location[]> => {
+const fetchLocations = async (): Promise<Location[]> => {
   const { data, error } = await supabase
     .from('locations')
     .select('*')

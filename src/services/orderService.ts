@@ -19,7 +19,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
   return data || [];
 };
 
-export const insertOrder = async (order: OrderInsert): Promise<Order> => {
+const insertOrder = async (order: OrderInsert): Promise<Order> => {
   const { data, error } = await supabase
     .from('orders')
     .insert(order)
@@ -45,7 +45,7 @@ export const insertBulkOrders = async (orders: OrderInsert[]): Promise<void> => 
   }
 };
 
-export const updateOrder = async (id: string, updates: Partial<Order>): Promise<Order> => {
+const updateOrder = async (id: string, updates: Partial<Order>): Promise<Order> => {
   const { data, error } = await supabase
     .from('orders')
     .update(updates)
@@ -61,7 +61,7 @@ export const updateOrder = async (id: string, updates: Partial<Order>): Promise<
   return data;
 };
 
-export const deleteOrder = async (id: string): Promise<void> => {
+const deleteOrder = async (id: string): Promise<void> => {
   const { error } = await supabase
     .from('orders')
     .delete()

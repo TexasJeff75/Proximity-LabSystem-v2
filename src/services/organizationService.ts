@@ -2,8 +2,8 @@ import { supabase } from './supabaseClient';
 import { Database } from '../types/supabase';
 
 export type Organization = Database['public']['Tables']['organizations']['Row'];
-export type OrganizationInsert = Database['public']['Tables']['organizations']['Insert'];
-export type OrgRep = Database['public']['Tables']['org_reps']['Row'];
+type OrganizationInsert = Database['public']['Tables']['organizations']['Insert'];
+type OrgRep = Database['public']['Tables']['org_reps']['Row'];
 
 // Extended organization type that includes org_reps data and counts
 export interface OrganizationWithReps extends Organization {
@@ -97,7 +97,7 @@ export const fetchOrganizationsWithReps = async (): Promise<OrganizationWithReps
   return organizationsWithCounts;
 };
 
-export const insertOrganization = async (organization: OrganizationInsert): Promise<Organization> => {
+const insertOrganization = async (organization: OrganizationInsert): Promise<Organization> => {
   const { data, error } = await supabase
     .from('organizations')
     .insert(organization)
@@ -128,7 +128,7 @@ export const updateOrganization = async (id: string, updates: Partial<Organizati
   return data;
 };
 
-export const deleteOrganization = async (id: string): Promise<void> => {
+const deleteOrganization = async (id: string): Promise<void> => {
   const { error } = await supabase
     .from('organizations')
     .delete()
@@ -140,7 +140,7 @@ export const deleteOrganization = async (id: string): Promise<void> => {
   }
 };
 
-export const getOrganizationByCode = async (orgCode: string): Promise<Organization | null> => {
+const getOrganizationByCode = async (orgCode: string): Promise<Organization | null> => {
   const { data, error } = await supabase
     .from('organizations')
     .select('*')

@@ -1,4 +1,4 @@
-export type Json =
+type Json =
   | string
   | number
   | boolean
@@ -379,6 +379,126 @@ export interface Database {
         Update: {
           test_method_id?: string
           protocol_id?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      batches: {
+        Row: {
+          id: string
+          batch_number: string
+          test_method_id: string
+          protocol_id: string
+          status: string
+          sample_count: number
+          created_at: string | null
+          started_at: string | null
+          completed_at: string | null
+          created_by: string | null
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          batch_number: string
+          test_method_id: string
+          protocol_id: string
+          status?: string
+          sample_count?: number
+          created_at?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          created_by?: string | null
+          notes?: string | null
+        }
+        Update: {
+          id?: string
+          batch_number?: string
+          test_method_id?: string
+          protocol_id?: string
+          status?: string
+          sample_count?: number
+          created_at?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          created_by?: string | null
+          notes?: string | null
+        }
+      }
+      protocol_steps: {
+        Row: {
+          id: string
+          protocol_id: string
+          step_name: string
+          step_order: number
+          description: string | null
+          estimated_duration: string | null
+          start_barcode: string
+          stop_barcode: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          protocol_id: string
+          step_name: string
+          step_order: number
+          description?: string | null
+          estimated_duration?: string | null
+          start_barcode: string
+          stop_barcode: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          protocol_id?: string
+          step_name?: string
+          step_order?: number
+          description?: string | null
+          estimated_duration?: string | null
+          start_barcode?: string
+          stop_barcode?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      workflow_executions: {
+        Row: {
+          id: string
+          batch_id: string
+          protocol_step_id: string
+          status: string
+          started_at: string | null
+          completed_at: string | null
+          started_by: string | null
+          completed_by: string | null
+          notes: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          batch_id: string
+          protocol_step_id: string
+          status?: string
+          started_at?: string | null
+          completed_at?: string | null
+          started_by?: string | null
+          completed_by?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          batch_id?: string
+          protocol_step_id?: string
+          status?: string
+          started_at?: string | null
+          completed_at?: string | null
+          started_by?: string | null
+          completed_by?: string | null
+          notes?: string | null
           created_at?: string | null
           updated_at?: string | null
         }

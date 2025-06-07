@@ -7,7 +7,7 @@
  * @param date Date to format
  * @returns Formatted date string
  */
-export const formatDate = (date: string | Date): string => {
+const formatDate = (date: string | Date): string => {
   if (!date) return '';
   return new Date(date).toLocaleDateString();
 };
@@ -17,7 +17,7 @@ export const formatDate = (date: string | Date): string => {
  * @param date Date to format
  * @returns Formatted time string
  */
-export const formatTime = (date: string | Date): string => {
+const formatTime = (date: string | Date): string => {
   if (!date) return '';
   return new Date(date).toLocaleTimeString([], {
     hour: '2-digit',
@@ -30,7 +30,7 @@ export const formatTime = (date: string | Date): string => {
  * @param date Date to format
  * @returns Formatted date and time string
  */
-export const formatDateTime = (date: string | Date): string => {
+const formatDateTime = (date: string | Date): string => {
   if (!date) return '';
   return new Date(date).toLocaleString();
 };
@@ -73,7 +73,7 @@ export const getStatusColor = (status: string): string => {
  * @param priority Priority string
  * @returns Tailwind CSS class string for the priority
  */
-export const getPriorityColor = (priority: string): string => {
+const getPriorityColor = (priority: string): string => {
   switch (priority) {
     case 'Urgent':
       return 'bg-red-100 text-red-800';
@@ -93,7 +93,7 @@ export const getPriorityColor = (priority: string): string => {
  * @param date Date to format
  * @returns Relative time string
  */
-export const formatRelativeTime = (date: string | Date): string => {
+const formatRelativeTime = (date: string | Date): string => {
   if (!date) return '';
   
   const now = new Date();
@@ -128,7 +128,7 @@ export const formatRelativeTime = (date: string | Date): string => {
  * @param length Maximum length
  * @returns Truncated text
  */
-export const truncateText = (text: string, length: number): string => {
+const truncateText = (text: string, length: number): string => {
   if (!text) return '';
   if (text.length <= length) return text;
   return text.substring(0, length) + '...';
@@ -139,7 +139,7 @@ export const truncateText = (text: string, length: number): string => {
  * @param name Name to format
  * @returns Formatted name
  */
-export const formatName = (name: string): string => {
+const formatName = (name: string): string => {
   if (!name) return '';
   return name
     .split(' ')
@@ -152,7 +152,7 @@ export const formatName = (name: string): string => {
  * @param rawName Raw patient name (e.g., " DOE, JOHN")
  * @returns Cleaned name (e.g., "John Doe")
  */
-export const cleanPatientName = (rawName: string): string => {
+const cleanPatientName = (rawName: string): string => {
   if (!rawName) return '';
   
   // Remove leading/trailing spaces

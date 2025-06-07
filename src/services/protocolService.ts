@@ -1,10 +1,10 @@
 import { supabase } from './supabaseClient';
 import { Database } from '../types/supabase';
 
-export type Protocol = Database['public']['Tables']['protocols']['Row'];
+type Protocol = Database['public']['Tables']['protocols']['Row'];
 export type ProtocolInsert = Database['public']['Tables']['protocols']['Insert'];
-export type TestMethodProtocol = Database['public']['Tables']['test_method_protocols']['Row'];
-export type TestMethodProtocolInsert = Database['public']['Tables']['test_method_protocols']['Insert'];
+type TestMethodProtocol = Database['public']['Tables']['test_method_protocols']['Row'];
+type TestMethodProtocolInsert = Database['public']['Tables']['test_method_protocols']['Insert'];
 
 // Extended protocol type that includes test method associations
 export interface ProtocolWithTestMethods extends Protocol {
@@ -15,7 +15,7 @@ export interface ProtocolWithTestMethods extends Protocol {
   }>;
 }
 
-export const fetchProtocols = async (): Promise<Protocol[]> => {
+const fetchProtocols = async (): Promise<Protocol[]> => {
   const { data, error } = await supabase
     .from('protocols')
     .select('*')
@@ -58,7 +58,7 @@ export const fetchProtocolsWithTestMethods = async (): Promise<ProtocolWithTestM
   return protocolsWithTestMethods;
 };
 
-export const fetchProtocolsByTestMethod = async (testMethodId: string): Promise<Protocol[]> => {
+const fetchProtocolsByTestMethod = async (testMethodId: string): Promise<Protocol[]> => {
   const { data, error } = await supabase
     .from('protocols')
     .select(`
@@ -121,7 +121,7 @@ export const deleteProtocol = async (id: string): Promise<void> => {
   }
 };
 
-export const getProtocolByName = async (name: string): Promise<Protocol | null> => {
+const getProtocolByName = async (name: string): Promise<Protocol | null> => {
   const { data, error } = await supabase
     .from('protocols')
     .select('*')
@@ -141,7 +141,7 @@ export const getProtocolByName = async (name: string): Promise<Protocol | null> 
 };
 
 // Test Method Protocol Association Functions
-export const associateProtocolWithTestMethod = async (
+const associateProtocolWithTestMethod = async (
   testMethodId: string, 
   protocolId: string
 ): Promise<TestMethodProtocol> => {
@@ -162,7 +162,7 @@ export const associateProtocolWithTestMethod = async (
   return data;
 };
 
-export const removeProtocolFromTestMethod = async (
+const removeProtocolFromTestMethod = async (
   testMethodId: string, 
   protocolId: string
 ): Promise<void> => {
@@ -178,7 +178,7 @@ export const removeProtocolFromTestMethod = async (
   }
 };
 
-export const updateTestMethodProtocols = async (
+const updateTestMethodProtocols = async (
   testMethodId: string, 
   protocolIds: string[]
 ): Promise<void> => {
@@ -211,7 +211,7 @@ export const updateTestMethodProtocols = async (
   }
 };
 
-export const insertBulkProtocols = async (protocols: ProtocolInsert[]): Promise<void> => {
+const insertBulkProtocols = async (protocols: ProtocolInsert[]): Promise<void> => {
   const { error } = await supabase
     .from('protocols')
     .upsert(protocols, { onConflict: 'name' });
