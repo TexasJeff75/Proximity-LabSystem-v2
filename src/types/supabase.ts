@@ -246,6 +246,85 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      test_methods: {
+        Row: {
+          id: string
+          organization_id: string
+          name: string
+          description: string | null
+          category: string
+          max_batch_size: number | null
+          processing_time: string | null
+          status: string | null
+          required_equipment: string[] | null
+          protocols: string[] | null
+          regulatory_requirements: string[] | null
+          quality_controls: string[] | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          name: string
+          description?: string | null
+          category: string
+          max_batch_size?: number | null
+          processing_time?: string | null
+          status?: string | null
+          required_equipment?: string[] | null
+          protocols?: string[] | null
+          regulatory_requirements?: string[] | null
+          quality_controls?: string[] | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          name?: string
+          description?: string | null
+          category?: string
+          max_batch_size?: number | null
+          processing_time?: string | null
+          status?: string | null
+          required_equipment?: string[] | null
+          protocols?: string[] | null
+          regulatory_requirements?: string[] | null
+          quality_controls?: string[] | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      test_panels: {
+        Row: {
+          id: string
+          test_method_id: string
+          name: string
+          description: string | null
+          panel_code: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          test_method_id: string
+          name: string
+          description?: string | null
+          panel_code: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          test_method_id?: string
+          name?: string
+          description?: string | null
+          panel_code?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never

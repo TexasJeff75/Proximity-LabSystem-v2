@@ -136,3 +136,14 @@ export const getTestMethodByName = async (organizationId: string, name: string):
 
   return data;
 };
+
+export const insertBulkTestMethods = async (testMethods: TestMethodInsert[]): Promise<void> => {
+  const { error } = await supabase
+    .from('test_methods')
+    .upsert(testMethods, { onConflict: 'organization_id,name' });
+
+  if (error) {
+    console.error('Error inserting bulk test methods:', error);
+    throw error;
+  }
+};

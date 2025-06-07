@@ -4,6 +4,7 @@ import {
   TestPanelInsert, 
   insertBulkTestPanels 
 } from '../services/testPanelService';
+import { insertBulkTestMethods } from '../services/testMethodService';
 import { fetchOrganizations } from '../services/organizationService';
 
 export interface ImportResult {
@@ -84,28 +85,33 @@ export const importTestMethodsAndPanels = async (fileContent: string): Promise<I
       console.warn('Import warnings:', errors);
     }
 
-    // Prepare test methods for bulk insert
+    // Prepare test methods for bulk insert with enhanced fields
     const testMethodsToInsert: TestMethodInsert[] = Array.from(testMethodsMap.values()).map(tm => ({
       organization_id: tm.organizationId,
       name: tm.name,
       description: `${tm.name} test method`,
       category: getTestMethodCategory(tm.name),
-      max_batch_size: 24,
+      max_batch_size: getMaxBatchSize(tm.name),
       processing_time: getProcessingTime(tm.name),
-      status: 'Active'
+      status: 'Active',
+      required_equipment: getRequiredEquipment(tm.name),
+      protocols: getProtocols(tm.name),
+      regulatory_requirements: getRegulatoryRequirements(tm.name),
+      quality_controls: getQualityControls(tm.name)
     }));
 
     // Insert test methods with upsert
+    await insertBulkTestMethods(testMethodsToInsert);
+
+    // Fetch the inserted test methods to get their IDs
     const { data: insertedTestMethods, error: testMethodError } = await supabase
       .from('test_methods')
-      .upsert(testMethodsToInsert, { 
-        onConflict: 'organization_id,name',
-        ignoreDuplicates: false 
-      })
-      .select('id, organization_id, name');
+      .select('id, organization_id, name')
+      .in('organization_id', Array.from(new Set(testMethodsToInsert.map(tm => tm.organization_id))))
+      .in('name', Array.from(new Set(testMethodsToInsert.map(tm => tm.name))));
 
     if (testMethodError) {
-      throw new Error(`Failed to insert test methods: ${testMethodError.message}`);
+      throw new Error(`Failed to fetch test methods: ${testMethodError.message}`);
     }
 
     // Create mapping from (organization_id, name) to test_method_id
@@ -174,6 +180,21 @@ const getTestMethodCategory = (testMethodName: string): string => {
   }
 };
 
+// Helper function to determine max batch size
+const getMaxBatchSize = (testMethodName: string): number => {
+  const name = testMethodName.toLowerCase();
+  
+  if (name.includes('pcr')) {
+    return 96;
+  } else if (name.includes('confirmation')) {
+    return 48;
+  } else if (name.includes('screen')) {
+    return 96;
+  } else {
+    return 24;
+  }
+};
+
 // Helper function to determine processing time
 const getProcessingTime = (testMethodName: string): string => {
   const name = testMethodName.toLowerCase();
@@ -186,5 +207,63 @@ const getProcessingTime = (testMethodName: string): string => {
     return '1-2 hours';
   } else {
     return '2-4 hours';
+  }
+};
+
+// Helper function to determine required equipment
+const getRequiredEquipment = (testMethodName: string): string[] => {
+  const name = testMethodName.toLowerCase();
+  
+  if (name.includes('pcr')) {
+    return ['PCR Machine', 'OT2-002', 'Thermal Cycler'];
+  } else if (name.includes('confirmation')) {
+    return ['LC-MS/MS', 'Centrifuge', 'Extraction Station'];
+  } else if (name.includes('screen')) {
+    return ['Immunoassay Analyzer', 'Pipettes'];
+  } else {
+    return ['Standard Lab Equipment'];
+  }
+};
+
+// Helper function to determine protocols
+const getProtocols = (testMethodName: string): string[] => {
+  const name = testMethodName.toLowerCase();
+  
+  if (name.includes('pcr')) {
+    return ['P004', 'PCR Setup Protocol'];
+  } else if (name.includes('confirmation')) {
+    return ['P005', 'LC-MS Confirmation Protocol'];
+  } else if (name.includes('screen')) {
+    return ['P006', 'Immunoassay Screening Protocol'];
+  } else {
+    return ['P001', 'Standard Protocol'];
+  }
+};
+
+// Helper function to determine regulatory requirements
+const getRegulatoryRequirements = (testMethodName: string): string[] => {
+  const name = testMethodName.toLowerCase();
+  
+  if (name.includes('pcr')) {
+    return ['CLIA', 'FDA EUA', 'ISO 15189'];
+  } else if (name.includes('confirmation') || name.includes('screen')) {
+    return ['CLIA', 'SAMHSA', 'DOT'];
+  } else {
+    return ['CLIA', 'CAP'];
+  }
+};
+
+// Helper function to determine quality controls
+const getQualityControls = (testMethodName: string): string[] => {
+  const name = testMethodName.toLowerCase();
+  
+  if (name.includes('pcr')) {
+    return ['Positive Control', 'Negative Control', 'Internal Control', 'Extraction Control'];
+  } else if (name.includes('confirmation')) {
+    return ['Calibrators', 'QC High', 'QC Low', 'Blank'];
+  } else if (name.includes('screen')) {
+    return ['Positive Control', 'Negative Control', 'Cutoff Control'];
+  } else {
+    return ['Daily QC', 'Calibration Check'];
   }
 };
