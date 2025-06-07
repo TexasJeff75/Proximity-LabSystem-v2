@@ -1363,6 +1363,34 @@ export const developmentLog: DevelopmentLogEntry[] = [
     relatedFiles: ['src/pages/*.tsx', 'src/components/*.tsx'],
     dependencies: ['Tailwind CSS'],
     notes: 'Progressive enhancement for mobile and tablet devices'
+  },
+  {
+    id: 'DEV016',
+    type: 'Feature',
+    title: 'Batch Processing Pipeline',
+    description: 'Comprehensive batch processing system with sample queuing, batch formation, and automated processing workflows',
+    status: 'Implemented',
+    priority: 'High',
+    date: '2025-01-06',
+    implementedDate: '2025-01-06',
+    assignee: 'Development Team',
+    relatedFiles: ['src/pages/BatchProcessing.tsx', 'src/components/ProtocolLibraryTab.tsx'],
+    dependencies: ['Orders table', 'Protocol system'],
+    notes: 'Includes sample queue management, batch statistics, and protocol library integration'
+  },
+  {
+    id: 'DEV017',
+    type: 'Database Migration',
+    title: 'Test Methods and Panels Configuration System',
+    description: 'Database tables and services for managing client-specific test methods and their associated panels (e.g., PCR with Vaginitis, HPV, UTI panels)',
+    status: 'Implemented',
+    priority: 'High',
+    date: '2025-01-06',
+    implementedDate: '2025-01-06',
+    assignee: 'Database Team',
+    relatedFiles: ['supabase/migrations/20250607050000_create_test_methods_table.sql', 'supabase/migrations/20250607050100_create_test_panels_table.sql', 'src/services/testMethodService.ts', 'src/services/testPanelService.ts'],
+    dependencies: ['Organizations table'],
+    notes: 'Supports organization-specific test configurations with panel management for complex test methods like PCR'
   }
 ];
 
