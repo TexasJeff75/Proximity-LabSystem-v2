@@ -36,7 +36,7 @@ export const insertOrder = async (order: OrderInsert): Promise<Order> => {
 export const insertBulkOrders = async (orders: OrderInsert[]): Promise<void> => {
   const { error } = await supabase
     .from('orders')
-    .insert(orders);
+    .upsert(orders, { onConflict: 'accession_id' });
 
   if (error) {
     console.error('Error inserting bulk orders:', error);
