@@ -45,6 +45,7 @@ export const getStatusColor = (status: string): string => {
     case 'Ready':
     case 'Active':
     case 'Completed':
+    case 'Final':
       return 'bg-green-100 text-green-800';
     case 'Running':
     case 'In Progress':

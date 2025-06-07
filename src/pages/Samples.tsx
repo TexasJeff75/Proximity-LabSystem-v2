@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { SearchIcon, PlusIcon, TestTubeIcon, BuildingIcon, StethoscopeIcon, XIcon, UserIcon, PhoneIcon, MailIcon, MapPinIcon, CreditCardIcon, ActivityIcon, ClipboardIcon, UsersIcon, HeartHandshakeIcon, CalendarIcon, GraduationCapIcon, ClockIcon, BookIcon, FilterIcon, ChevronDownIcon } from 'lucide-react';
+import { SearchIcon, PlusIcon, TestTubeIcon, BuildingIcon, StethoscopeIcon, XIcon, UserIcon, PhoneIcon, MailIcon, MapPinIcon, CreditCardIcon, ActivityIcon, ClipboardIcon, UsersIcon, HeartHandshakeIcon, CalendarIcon, GraduationCapIcon, ClockIcon, BookIcon, FilterIcon, ChevronDownIcon, RefreshCwIcon } from 'lucide-react';
 import { fetchOrders, Order } from '../services/orderService';
 import { OrderImporter } from '../components/OrderImporter';
+import { getStatusColor } from '../utils/formatters';
 
 // Keep the existing mock data for patient details, organization details, and provider details
 // These will be used until we implement those tables in Supabase
@@ -253,13 +254,23 @@ export function Samples() {
             {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} applied)`}
           </p>
         </div>
-        <button
-          onClick={() => setShowImporter(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Import Orders
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={loadOrders}
+            disabled={loading}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            <RefreshCwIcon className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <button
+            onClick={() => setShowImporter(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Import Orders
+          </button>
+        </div>
       </div>
 
       <div className="bg-white shadow rounded-lg">
@@ -460,12 +471,7 @@ export function Samples() {
                       {order.provider}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        order.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                        order.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                        order.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
                         {order.status}
                       </span>
                     </td>
@@ -626,12 +632,7 @@ export function Samples() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Status:</span>
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        selectedOrder.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                        selectedOrder.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                        selectedOrder.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedOrder.status)}`}>
                         {selectedOrder.status}
                       </span>
                     </div>

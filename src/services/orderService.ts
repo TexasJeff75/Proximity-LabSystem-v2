@@ -8,6 +8,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
   const { data, error } = await supabase
     .from('orders')
     .select('*')
+    .neq('status', 'Final') // Exclude orders with 'Final' status
     .order('collection_date', { ascending: false });
 
   if (error) {
