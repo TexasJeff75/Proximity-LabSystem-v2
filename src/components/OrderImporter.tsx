@@ -17,16 +17,29 @@ export const OrderImporter: React.FC = () => {
 
     try {
       const text = await file.text();
-      const orders = parseCSVToOrders(text);
+      const parsedOrders = parseCSVToOrders(text);
       
-      if (orders.length === 0) {
+      if (parsedOrders.length === 0) {
         throw new Error('No valid orders found in the CSV file');
       }
       
-      await insertBulkOrders(orders);
+      // Deduplicate orders based on accession_id
+      const orderMap = new Map();
+      parsedOrders.forEach(order => {
+        orderMap.set(order.accession_id, order);
+      });
+      
+      const uniqueOrders = Array.from(orderMap.values());
+      const duplicateCount = parsedOrders.length - uniqueOrders.length;
+      
+      await insertBulkOrders(uniqueOrders);
       
       setImportStatus('success');
-      setMessage(`Successfully imported ${orders.length} orders`);
+      let successMessage = `Successfully imported ${uniqueOrders.length} orders`;
+      if (duplicateCount > 0) {
+        successMessage += ` (${duplicateCount} duplicate${duplicateCount > 1 ? 's' : ''} removed)`;
+      }
+      setMessage(successMessage);
     } catch (error) {
       console.error('Error importing orders:', error);
       setImportStatus('error');
