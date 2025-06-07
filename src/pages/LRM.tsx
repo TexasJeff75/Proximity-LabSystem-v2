@@ -330,6 +330,12 @@ export function LRM() {
                     CLIA
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Locations
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contacts
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Sales Rep
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -386,6 +392,22 @@ export function LRM() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {org.clia || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {org.location_count || 0}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <UsersIcon className="h-4 w-4 text-gray-400 mr-1" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {org.contact_count || 0}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {org.org_reps?.sales_rep || '-'}
@@ -921,6 +943,24 @@ export function LRM() {
                     <div className="flex justify-between">
                       <span className="text-gray-500">Sales Executive:</span>
                       <span className="font-medium">{selectedOrg.org_reps?.sales_executive || '-'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Counts */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                    <TrendingUpIcon className="h-4 w-4 mr-2" />
+                    Statistics
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Locations:</span>
+                      <span className="font-medium">{selectedOrg.location_count || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Contacts:</span>
+                      <span className="font-medium">{selectedOrg.contact_count || 0}</span>
                     </div>
                   </div>
                 </div>

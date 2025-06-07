@@ -5,9 +5,11 @@ export type Organization = Database['public']['Tables']['organizations']['Row'];
 export type OrganizationInsert = Database['public']['Tables']['organizations']['Insert'];
 export type OrgRep = Database['public']['Tables']['org_reps']['Row'];
 
-// Extended organization type that includes org_reps data
+// Extended organization type that includes org_reps data and counts
 export interface OrganizationWithReps extends Organization {
   org_reps?: OrgRep | null;
+  location_count?: number;
+  contact_count?: number;
 }
 
 export const fetchOrganizations = async (): Promise<Organization[]> => {
@@ -45,7 +47,54 @@ export const fetchOrganizationsWithReps = async (): Promise<OrganizationWithReps
     throw error;
   }
 
-  return data || [];
+  // Get location counts for all organizations
+  const { data: locationCounts, error: locationError } = await supabase
+    .from('locations')
+    .select('organization_id')
+    .then(({ data, error }) => {
+      if (error) throw error;
+      
+      // Count locations by organization_id
+      const counts: Record<string, number> = {};
+      data?.forEach(location => {
+        counts[location.organization_id] = (counts[location.organization_id] || 0) + 1;
+      });
+      
+      return { data: counts, error: null };
+    });
+
+  if (locationError) {
+    console.error('Error fetching location counts:', locationError);
+  }
+
+  // Get contact counts for all organizations
+  const { data: contactCounts, error: contactError } = await supabase
+    .from('contacts')
+    .select('organization_code')
+    .then(({ data, error }) => {
+      if (error) throw error;
+      
+      // Count contacts by organization_code
+      const counts: Record<string, number> = {};
+      data?.forEach(contact => {
+        counts[contact.organization_code] = (counts[contact.organization_code] || 0) + 1;
+      });
+      
+      return { data: counts, error: null };
+    });
+
+  if (contactError) {
+    console.error('Error fetching contact counts:', contactError);
+  }
+
+  // Combine the data with counts
+  const organizationsWithCounts = data?.map(org => ({
+    ...org,
+    location_count: locationCounts?.[org.id] || 0,
+    contact_count: contactCounts?.[org.org_code] || 0
+  })) || [];
+
+  return organizationsWithCounts;
 };
 
 export const insertOrganization = async (organization: OrganizationInsert): Promise<Organization> => {
