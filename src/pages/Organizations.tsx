@@ -7,7 +7,7 @@ import { fetchOrganizations, Organization } from '../services/organizationServic
 const locations = [{
   id: 'LOC001',
   name: 'Metro Health Downtown',
-  orgId: 'ORG001',
+  orgId: 'AMMO',
   address: '123 Medical Center Dr',
   city: 'Downtown',
   type: 'Main Hospital',
@@ -15,7 +15,7 @@ const locations = [{
 }, {
   id: 'LOC002',
   name: 'Metro Health North',
-  orgId: 'ORG001',
+  orgId: 'AMMO',
   address: '456 North Ave',
   city: 'Northside',
   type: 'Satellite Clinic',
@@ -23,7 +23,7 @@ const locations = [{
 }, {
   id: 'LOC003',
   name: 'Community Care Central',
-  orgId: 'ORG002',
+  orgId: 'AQA',
   address: '789 Central St',
   city: 'Central',
   type: 'Primary Clinic',
@@ -31,7 +31,7 @@ const locations = [{
 }, {
   id: 'LOC004',
   name: 'Community Care West',
-  orgId: 'ORG002',
+  orgId: 'AQA',
   address: '321 West Blvd',
   city: 'Westside',
   type: 'Urgent Care',
@@ -39,7 +39,7 @@ const locations = [{
 }, {
   id: 'LOC005',
   name: 'Regional Med Main',
-  orgId: 'ORG003',
+  orgId: 'CSPI',
   address: '654 Main St',
   city: 'Midtown',
   type: 'Medical Office',
@@ -49,7 +49,7 @@ const locations = [{
 const providers = [{
   id: 'PROV001',
   name: 'Dr. Sarah Johnson',
-  orgId: 'ORG001',
+  orgId: 'AMMO',
   specialty: 'Internal Medicine',
   phone: '(555) 111-2222',
   email: 'sjohnson@metrohealth.com',
@@ -57,7 +57,7 @@ const providers = [{
 }, {
   id: 'PROV002',
   name: 'Dr. Michael Chen',
-  orgId: 'ORG001',
+  orgId: 'AMMO',
   specialty: 'Cardiology',
   phone: '(555) 111-3333',
   email: 'mchen@metrohealth.com',
@@ -65,7 +65,7 @@ const providers = [{
 }, {
   id: 'PROV003',
   name: 'Dr. Emily Rodriguez',
-  orgId: 'ORG002',
+  orgId: 'AQA',
   specialty: 'Family Medicine',
   phone: '(555) 222-4444',
   email: 'erodriguez@communitycare.com',
@@ -73,7 +73,7 @@ const providers = [{
 }, {
   id: 'PROV004',
   name: 'Dr. David Kim',
-  orgId: 'ORG002',
+  orgId: 'AQA',
   specialty: 'Pediatrics',
   phone: '(555) 222-5555',
   email: 'dkim@communitycare.com',
@@ -81,7 +81,7 @@ const providers = [{
 }, {
   id: 'PROV005',
   name: 'Dr. Lisa Thompson',
-  orgId: 'ORG003',
+  orgId: 'CSPI',
   specialty: 'Dermatology',
   phone: '(555) 333-6666',
   email: 'lthompson@regionalmed.com',
@@ -91,7 +91,7 @@ const providers = [{
 const staff = [{
   id: 'STAFF001',
   name: 'Jennifer Adams',
-  orgId: 'ORG001',
+  orgId: 'AMMO',
   role: 'Lab Technician',
   department: 'Laboratory',
   phone: '(555) 111-7777',
@@ -100,7 +100,7 @@ const staff = [{
 }, {
   id: 'STAFF002',
   name: 'Robert Wilson',
-  orgId: 'ORG001',
+  orgId: 'AMMO',
   role: 'Nurse Manager',
   department: 'Nursing',
   phone: '(555) 111-8888',
@@ -109,7 +109,7 @@ const staff = [{
 }, {
   id: 'STAFF003',
   name: 'Maria Garcia',
-  orgId: 'ORG002',
+  orgId: 'AQA',
   role: 'Medical Assistant',
   department: 'Clinical',
   phone: '(555) 222-9999',
@@ -118,7 +118,7 @@ const staff = [{
 }, {
   id: 'STAFF004',
   name: 'James Miller',
-  orgId: 'ORG003',
+  orgId: 'CSPI',
   role: 'Lab Coordinator',
   department: 'Laboratory',
   phone: '(555) 333-0000',
@@ -192,7 +192,7 @@ export function Organizations() {
   });
 
   const getOrgName = (orgId: string) => {
-    return organizations.find(org => org.id === orgId)?.name || 'Unknown';
+    return organizations.find(org => org.org_code === orgId)?.name || 'Unknown';
   };
 
   // Paginate data
@@ -338,7 +338,7 @@ export function Organizations() {
             >
               <option value="All">All Organizations</option>
               {organizations.map(org => (
-                <option key={org.id} value={org.id}>
+                <option key={org.org_code} value={org.org_code}>
                   {org.name}
                 </option>
               ))}
