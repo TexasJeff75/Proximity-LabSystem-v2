@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XIcon, SaveIcon, AlertCircleIcon } from 'lucide-react';
+import { XIcon, SaveIcon, AlertCircleIcon, TrashIcon } from 'lucide-react';
 import { TestMethodWithPanels, updateTestMethod } from '../services/testMethodService';
 import { fetchOrganizations, Organization } from '../services/organizationService';
 
@@ -7,12 +7,14 @@ interface TestMethodEditSlideOutProps {
   testMethod: TestMethodWithPanels;
   onSave: (updatedMethod: TestMethodWithPanels) => void;
   onClose: () => void;
+  onDelete: (id: string) => void;
 }
 
 export const TestMethodEditSlideOut: React.FC<TestMethodEditSlideOutProps> = ({
   testMethod,
   onSave,
-  onClose
+  onClose,
+  onDelete
 }) => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,6 +100,16 @@ export const TestMethodEditSlideOut: React.FC<TestMethodEditSlideOutProps> = ({
       setError(err instanceof Error ? err.message : 'Failed to save test method');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${testMethod.name}"?\n\nThis will permanently delete the test method and all associated panels. This action cannot be undone.`
+    );
+    
+    if (confirmed) {
+      onDelete(testMethod.id);
     }
   };
 
@@ -333,22 +345,33 @@ export const TestMethodEditSlideOut: React.FC<TestMethodEditSlideOutProps> = ({
 
           {/* Footer */}
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-between">
               <button
-                onClick={onClose}
+                onClick={handleDelete}
                 disabled={loading}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center space-x-2"
               >
-                Cancel
+                <TrashIcon className="h-4 w-4" />
+                <span>Delete</span>
               </button>
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
-              >
-                <SaveIcon className="h-4 w-4" />
-                <span>{loading ? 'Saving...' : 'Save Changes'}</span>
-              </button>
+              
+              <div className="flex space-x-3">
+                <button
+                  onClick={onClose}
+                  disabled={loading}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
+                >
+                  <SaveIcon className="h-4 w-4" />
+                  <span>{loading ? 'Saving...' : 'Save Changes'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

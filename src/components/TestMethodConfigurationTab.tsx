@@ -90,14 +90,11 @@ export const TestMethodConfigurationTab: React.FC<TestMethodConfigurationTabProp
     setEditingMethod(null);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this test method? This will also delete all associated panels.')) {
-      return;
-    }
-
+  const handleDeleteMethod = async (id: string) => {
     try {
       await deleteTestMethod(id);
       setTestMethods(prev => prev.filter(tm => tm.id !== id));
+      setEditingMethod(null); // Close the slide-out after deletion
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete test method');
     }
@@ -296,12 +293,6 @@ export const TestMethodConfigurationTab: React.FC<TestMethodConfigurationTabProp
                   <EditIcon className="h-4 w-4" />
                   <span>Edit</span>
                 </button>
-                <button 
-                  onClick={() => handleDelete(method.id)}
-                  className="bg-red-100 text-red-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-200"
-                >
-                  <XIcon className="h-4 w-4" />
-                </button>
                 <button className="bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200">
                   <SettingsIcon className="h-4 w-4" />
                 </button>
@@ -362,6 +353,7 @@ export const TestMethodConfigurationTab: React.FC<TestMethodConfigurationTabProp
           testMethod={editingMethod}
           onSave={handleSaveMethod}
           onClose={handleCloseEdit}
+          onDelete={handleDeleteMethod}
         />
       )}
     </>
