@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIcon, PhoneIcon, MailIcon, EditIcon, TrashIcon, UsersIcon, RefreshCwIcon, XIcon, SaveIcon, HeartHandshakeIcon, CalendarIcon, DollarSignIcon, FileTextIcon, TrendingUpIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon } from 'lucide-react';
-import { fetchOrganizations, Organization } from '../services/organizationService';
+import { fetchOrganizationsWithReps, OrganizationWithReps } from '../services/organizationService';
 
 // Mock data for interactions, contracts, and other LRM-specific data
 const interactions = [
@@ -73,12 +73,12 @@ const contracts = [
 ];
 
 export function LRM() {
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [organizations, setOrganizations] = useState<OrganizationWithReps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState('organizations');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [selectedOrg, setSelectedOrg] = useState<OrganizationWithReps | null>(null);
   const [showNewInteractionModal, setShowNewInteractionModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -90,7 +90,7 @@ export function LRM() {
   const loadOrganizations = async () => {
     try {
       setLoading(true);
-      const data = await fetchOrganizations();
+      const data = await fetchOrganizationsWithReps();
       setOrganizations(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load organizations');
@@ -102,7 +102,10 @@ export function LRM() {
   const filteredOrganizations = organizations.filter(org =>
     org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     org.org_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (org.medical_director && org.medical_director.toLowerCase().includes(searchTerm.toLowerCase()))
+    (org.medical_director && org.medical_director.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (org.org_reps?.sales_rep && org.org_reps.sales_rep.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (org.org_reps?.account_manager && org.org_reps.account_manager.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (org.org_reps?.sales_executive && org.org_reps.sales_executive.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const filteredInteractions = interactions.filter(interaction => {
@@ -299,6 +302,15 @@ export function LRM() {
                     CLIA
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sales Rep
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Account Manager
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sales Executive
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -346,6 +358,15 @@ export function LRM() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {org.clia || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {org.org_reps?.sales_rep || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {org.org_reps?.account_manager || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {org.org_reps?.sales_executive || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
@@ -716,10 +737,8 @@ export function LRM() {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Address Information */}
-              <div className="space-y-4">
+                {/* Address Information */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
                     <MapPinIcon className="h-4 w-4 mr-2" />
@@ -741,6 +760,30 @@ export function LRM() {
                     <div className="flex justify-between">
                       <span className="text-gray-500">ZIP:</span>
                       <span className="font-medium">{selectedOrg.zip || '-'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sales Team and Activity */}
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                    <UsersIcon className="h-4 w-4 mr-2" />
+                    Sales Team
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Sales Rep:</span>
+                      <span className="font-medium">{selectedOrg.org_reps?.sales_rep || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Account Manager:</span>
+                      <span className="font-medium">{selectedOrg.org_reps?.account_manager || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Sales Executive:</span>
+                      <span className="font-medium">{selectedOrg.org_reps?.sales_executive || '-'}</span>
                     </div>
                   </div>
                 </div>

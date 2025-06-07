@@ -3,6 +3,12 @@ import { Database } from '../types/supabase';
 
 export type Organization = Database['public']['Tables']['organizations']['Row'];
 export type OrganizationInsert = Database['public']['Tables']['organizations']['Insert'];
+export type OrgRep = Database['public']['Tables']['org_reps']['Row'];
+
+// Extended organization type that includes org_reps data
+export interface OrganizationWithReps extends Organization {
+  org_reps?: OrgRep | null;
+}
 
 export const fetchOrganizations = async (): Promise<Organization[]> => {
   const { data, error } = await supabase
@@ -12,6 +18,30 @@ export const fetchOrganizations = async (): Promise<Organization[]> => {
 
   if (error) {
     console.error('Error fetching organizations:', error);
+    throw error;
+  }
+
+  return data || [];
+};
+
+export const fetchOrganizationsWithReps = async (): Promise<OrganizationWithReps[]> => {
+  const { data, error } = await supabase
+    .from('organizations')
+    .select(`
+      *,
+      org_reps (
+        id,
+        sales_rep,
+        account_manager,
+        sales_executive,
+        created_at,
+        updated_at
+      )
+    `)
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching organizations with reps:', error);
     throw error;
   }
 

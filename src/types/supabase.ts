@@ -109,6 +109,35 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      org_reps: {
+        Row: {
+          id: string
+          organization_id: string
+          sales_rep: string | null
+          account_manager: string | null
+          sales_executive: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          sales_rep?: string | null
+          account_manager?: string | null
+          sales_executive?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          sales_rep?: string | null
+          account_manager?: string | null
+          sales_executive?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
