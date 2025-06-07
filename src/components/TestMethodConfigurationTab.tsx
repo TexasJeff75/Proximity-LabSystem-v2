@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { PlusIcon, EditIcon, SaveIcon, XIcon, SettingsIcon, TestTubeIcon, ClockIcon, UsersIcon, AlertCircleIcon } from 'lucide-react';
+import { PlusIcon, EditIcon, SaveIcon, XIcon, SettingsIcon, TestTubeIcon, ClockIcon, UsersIcon, AlertCircleIcon, UploadIcon } from 'lucide-react';
 import { fetchTestMethodsWithPanels, TestMethodWithPanels, updateTestMethod, deleteTestMethod } from '../services/testMethodService';
 import { fetchOrganizations, Organization } from '../services/organizationService';
 
-export const TestMethodConfigurationTab: React.FC = () => {
+interface TestMethodConfigurationTabProps {
+  onImportClick: () => void;
+}
+
+export const TestMethodConfigurationTab: React.FC<TestMethodConfigurationTabProps> = ({ onImportClick }) => {
   const [testMethods, setTestMethods] = useState<TestMethodWithPanels[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,6 +134,13 @@ export const TestMethodConfigurationTab: React.FC = () => {
               <option key={org.id} value={org.id}>{org.name}</option>
             ))}
           </select>
+          <button
+            onClick={onImportClick}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700"
+          >
+            <UploadIcon className="h-4 w-4" />
+            <span>Import Test Methods</span>
+          </button>
           <button
             onClick={() => setShowNewMethodModal(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700"

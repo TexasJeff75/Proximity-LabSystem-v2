@@ -691,25 +691,10 @@ export function Settings() {
       {/* Test Method Configuration Tab */}
       {activeTab === 'test-methods' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Test Method Configuration
-              </h2>
-              <p className="text-gray-600">
-                Configure test methods, panels, and processing requirements
-              </p>
-            </div>
-            <button
-              onClick={() => setShowTestMethodImporter(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700"
-            >
-              <UploadIcon className="h-4 w-4" />
-              <span>Import Test Methods</span>
-            </button>
-          </div>
-          
-          <TestMethodConfigurationTab key={testMethodConfigKey} />
+          <TestMethodConfigurationTab 
+            key={testMethodConfigKey} 
+            onImportClick={() => setShowTestMethodImporter(true)}
+          />
         </div>
       )}
 
