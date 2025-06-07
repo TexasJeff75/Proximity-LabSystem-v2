@@ -165,10 +165,10 @@ export const TestMethodConfigurationTab: React.FC<TestMethodConfigurationTabProp
           </div>
         </div>
 
-        {/* Test Methods Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Responsive Test Methods Grid */}
+        <div className="responsive-grid-container">
           {filteredTestMethods.map(method => (
-            <div key={method.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div key={method.id} className="responsive-grid-item">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-blue-100 rounded-lg">
@@ -356,6 +356,89 @@ export const TestMethodConfigurationTab: React.FC<TestMethodConfigurationTabProp
           onDelete={handleDeleteMethod}
         />
       )}
+
+      <style jsx>{`
+        .responsive-grid-container {
+          display: grid;
+          gap: 20px;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 20px;
+          transition: all 0.3s ease;
+          
+          /* Desktop: 3 columns */
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .responsive-grid-item {
+          background: white;
+          padding: 16px;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e7eb;
+          transition: all 0.3s ease;
+          height: fit-content;
+        }
+
+        .responsive-grid-item:hover {
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          transform: translateY(-1px);
+        }
+
+        /* Tablet: 2 columns */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .responsive-grid-container {
+            grid-template-columns: repeat(2, 1fr);
+            padding: 0 16px;
+          }
+        }
+
+        /* Mobile: 1 column */
+        @media (max-width: 767px) {
+          .responsive-grid-container {
+            grid-template-columns: 1fr;
+            padding: 0 12px;
+            gap: 16px;
+          }
+          
+          .responsive-grid-item {
+            padding: 12px;
+          }
+        }
+
+        /* Ensure equal height within rows */
+        .responsive-grid-container {
+          align-items: start;
+        }
+
+        /* Center the grid container */
+        .responsive-grid-container {
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        /* Smooth transitions for layout changes */
+        @media (prefers-reduced-motion: no-preference) {
+          .responsive-grid-container,
+          .responsive-grid-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+        }
+
+        /* Additional responsive adjustments */
+        @media (max-width: 640px) {
+          .responsive-grid-container {
+            gap: 12px;
+            padding: 0 8px;
+          }
+        }
+
+        @media (min-width: 1400px) {
+          .responsive-grid-container {
+            max-width: 1400px;
+          }
+        }
+      `}</style>
     </>
   );
 };
