@@ -2,139 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIcon, PhoneIcon, MailIcon, EditIcon, TrashIcon, UsersIcon, RefreshCwIcon } from 'lucide-react';
 import { fetchOrganizations, Organization } from '../services/organizationService';
 
-// Keep existing mock data for locations, providers, and staff
-// These will be used until we implement those tables in Supabase
-const locations = [{
-  id: 'LOC001',
-  name: 'Metro Health Downtown',
-  orgId: 'AMMO',
-  address: '123 Medical Center Dr',
-  city: 'Downtown',
-  type: 'Main Hospital',
-  status: 'Active'
-}, {
-  id: 'LOC002',
-  name: 'Metro Health North',
-  orgId: 'AMMO',
-  address: '456 North Ave',
-  city: 'Northside',
-  type: 'Satellite Clinic',
-  status: 'Active'
-}, {
-  id: 'LOC003',
-  name: 'Community Care Central',
-  orgId: 'AQA',
-  address: '789 Central St',
-  city: 'Central',
-  type: 'Primary Clinic',
-  status: 'Active'
-}, {
-  id: 'LOC004',
-  name: 'Community Care West',
-  orgId: 'AQA',
-  address: '321 West Blvd',
-  city: 'Westside',
-  type: 'Urgent Care',
-  status: 'Active'
-}, {
-  id: 'LOC005',
-  name: 'Regional Med Main',
-  orgId: 'CSPI',
-  address: '654 Main St',
-  city: 'Midtown',
-  type: 'Medical Office',
-  status: 'Active'
-}];
-
-const providers = [{
-  id: 'PROV001',
-  name: 'Dr. Sarah Johnson',
-  orgId: 'AMMO',
-  specialty: 'Internal Medicine',
-  phone: '(555) 111-2222',
-  email: 'sjohnson@metrohealth.com',
-  status: 'Active'
-}, {
-  id: 'PROV002',
-  name: 'Dr. Michael Chen',
-  orgId: 'AMMO',
-  specialty: 'Cardiology',
-  phone: '(555) 111-3333',
-  email: 'mchen@metrohealth.com',
-  status: 'Active'
-}, {
-  id: 'PROV003',
-  name: 'Dr. Emily Rodriguez',
-  orgId: 'AQA',
-  specialty: 'Family Medicine',
-  phone: '(555) 222-4444',
-  email: 'erodriguez@communitycare.com',
-  status: 'Active'
-}, {
-  id: 'PROV004',
-  name: 'Dr. David Kim',
-  orgId: 'AQA',
-  specialty: 'Pediatrics',
-  phone: '(555) 222-5555',
-  email: 'dkim@communitycare.com',
-  status: 'Active'
-}, {
-  id: 'PROV005',
-  name: 'Dr. Lisa Thompson',
-  orgId: 'CSPI',
-  specialty: 'Dermatology',
-  phone: '(555) 333-6666',
-  email: 'lthompson@regionalmed.com',
-  status: 'Active'
-}];
-
-const staff = [{
-  id: 'STAFF001',
-  name: 'Jennifer Adams',
-  orgId: 'AMMO',
-  role: 'Lab Technician',
-  department: 'Laboratory',
-  phone: '(555) 111-7777',
-  email: 'jadams@metrohealth.com',
-  status: 'Active'
-}, {
-  id: 'STAFF002',
-  name: 'Robert Wilson',
-  orgId: 'AMMO',
-  role: 'Nurse Manager',
-  department: 'Nursing',
-  phone: '(555) 111-8888',
-  email: 'rwilson@metrohealth.com',
-  status: 'Active'
-}, {
-  id: 'STAFF003',
-  name: 'Maria Garcia',
-  orgId: 'AQA',
-  role: 'Medical Assistant',
-  department: 'Clinical',
-  phone: '(555) 222-9999',
-  email: 'mgarcia@communitycare.com',
-  status: 'Active'
-}, {
-  id: 'STAFF004',
-  name: 'James Miller',
-  orgId: 'CSPI',
-  role: 'Lab Coordinator',
-  department: 'Laboratory',
-  phone: '(555) 333-0000',
-  email: 'jmiller@regionalmed.com',
-  status: 'Active'
-}];
-
 export function Organizations() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState('organizations');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOrg, setSelectedOrg] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadOrganizations();
@@ -152,89 +27,18 @@ export function Organizations() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-100 text-green-800';
-      case 'Inactive':
-        return 'bg-gray-100 text-gray-800';
-      case 'Suspended':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const filteredOrganizations = organizations.filter(org => 
     org.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    org.org_code.toLowerCase().includes(searchTerm.toLowerCase())
+    org.org_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (org.medical_director && org.medical_director.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (org.clia && org.clia.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const filteredLocations = locations.filter(location => {
-    const matchesSearch = location.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         location.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesOrg = selectedOrg === 'All' || location.orgId === selectedOrg;
-    return matchesSearch && matchesOrg;
-  });
-
-  const filteredProviders = providers.filter(provider => {
-    const matchesSearch = provider.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         provider.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesOrg = selectedOrg === 'All' || provider.orgId === selectedOrg;
-    return matchesSearch && matchesOrg;
-  });
-
-  const filteredStaff = staff.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         member.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesOrg = selectedOrg === 'All' || member.orgId === selectedOrg;
-    return matchesSearch && matchesOrg;
-  });
-
-  const getOrgName = (orgId: string) => {
-    return organizations.find(org => org.org_code === orgId)?.name || 'Unknown';
-  };
-
-  // Paginate data
-  const paginateData = <T extends any>(items: T[]) => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return items.slice(startIndex, endIndex);
-  };
-
-  // Calculate total pages
-  const getTotalPages = (totalItems: number) => Math.ceil(totalItems / itemsPerPage);
-
-  // Update filtered data with pagination
-  const paginatedLocations = paginateData(filteredLocations);
-  const paginatedProviders = paginateData(filteredProviders);
-  const paginatedStaff = paginateData(filteredStaff);
-
-  // Pagination controls component
-  const PaginationControls = ({ totalItems }: { totalItems: number }) => {
-    const totalPages = getTotalPages(totalItems);
-    return (
-      <div className="flex justify-between items-center p-4 border-t">
-        <button
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-300"
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span className="text-sm text-gray-600">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-300"
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
-      </div>
-    );
-  };
+  // Pagination for organizations
+  const totalPages = Math.ceil(filteredOrganizations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentOrganizations = filteredOrganizations.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -267,7 +71,7 @@ export function Organizations() {
               Organization Management
             </h1>
             <p className="text-gray-600">
-              Manage organizations, locations, providers, and staff
+              Manage organizations and their information
             </p>
           </div>
           <div className="flex space-x-3">
@@ -279,423 +83,240 @@ export function Organizations() {
               <RefreshCwIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </button>
-            <button className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-50">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
               <PlusIcon className="h-4 w-4" />
-              <span>
-                Add {selectedTab === 'organizations' ? 'Organization' : 
-                     selectedTab === 'locations' ? 'Location' : 
-                     selectedTab === 'providers' ? 'Provider' : 'Staff Member'}
-              </span>
+              <span>Add Organization</span>
             </button>
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {[
-              { key: 'organizations', label: 'Organizations', icon: BuildingIcon },
-              { key: 'locations', label: 'Locations', icon: MapPinIcon },
-              { key: 'providers', label: 'Providers', icon: StethoscopeIcon },
-              { key: 'staff', label: 'Staff', icon: UsersIcon }
-            ].map(tab => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setSelectedTab(tab.key)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
-                    selectedTab === tab.key
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Search and Filters */}
+        {/* Search */}
         <div className="flex space-x-4 mt-6">
           <div className="relative flex-1">
             <SearchIcon className="h-5 w-5 absolute left-3 top-3 text-gray-400" />
             <input
               type="text"
-              placeholder={`Search ${selectedTab}...`}
+              placeholder="Search organizations by name, code, medical director, or CLIA..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {selectedTab !== 'organizations' && (
-            <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              value={selectedOrg}
-              onChange={(e) => setSelectedOrg(e.target.value)}
-            >
-              <option value="All">All Organizations</option>
-              {organizations.map(org => (
-                <option key={org.org_code} value={org.org_code}>
-                  {org.name}
-                </option>
-              ))}
-            </select>
-          )}
         </div>
       </div>
 
-      {/* Organizations Tab */}
-      {selectedTab === 'organizations' && (
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Organization
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Medical Director
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    CLIA
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Address
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredOrganizations.map(org => (
-                  <tr key={org.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <BuildingIcon className="h-5 w-5 text-blue-600" />
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {org.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {org.org_code}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {org.medical_director || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {org.clia || '-'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">
-                        {org.street && (
-                          <div>{org.street}</div>
-                        )}
-                        {(org.city || org.state || org.zip) && (
-                          <div className="text-gray-500">
-                            {[org.city, org.state, org.zip].filter(Boolean).join(', ')}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="space-y-1">
-                        {org.phone && (
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <PhoneIcon className="h-4 w-4" />
-                            <span>{org.phone}</span>
-                          </div>
-                        )}
-                        {org.fax && (
-                          <div className="text-sm text-gray-600">
-                            Fax: {org.fax}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex space-x-2">
-                        <button className="bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center space-x-1">
-                          <EditIcon className="h-4 w-4" />
-                          <span>Edit</span>
-                        </button>
-                        <button className="bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200">
-                          View
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredOrganizations.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                No organizations match the current filters
-              </div>
-            )}
+      {/* Organizations Table */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-medium text-gray-900">Organizations</h2>
+            <span className="text-sm text-gray-500">
+              {filteredOrganizations.length} of {organizations.length} organizations
+            </span>
           </div>
         </div>
-      )}
+        
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Organization
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Medical Director
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  CLIA
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Address
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Contact
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Created
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {currentOrganizations.map(org => (
+                <tr key={org.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                          <BuildingIcon className="h-5 w-5 text-blue-600" />
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {org.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Code: {org.org_code}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {org.medical_director || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {org.clia || '-'}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900">
+                      {org.street && (
+                        <div>{org.street}</div>
+                      )}
+                      {(org.city || org.state || org.zip) && (
+                        <div className="text-gray-500">
+                          {[org.city, org.state, org.zip].filter(Boolean).join(', ')}
+                        </div>
+                      )}
+                      {!org.street && !org.city && !org.state && !org.zip && (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="space-y-1">
+                      {org.phone && (
+                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                          <PhoneIcon className="h-4 w-4" />
+                          <span>{org.phone}</span>
+                        </div>
+                      )}
+                      {org.fax && (
+                        <div className="text-sm text-gray-600">
+                          Fax: {org.fax}
+                        </div>
+                      )}
+                      {!org.phone && !org.fax && (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {org.created_at ? new Date(org.created_at).toLocaleDateString() : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex space-x-2">
+                      <button className="bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center space-x-1">
+                        <EditIcon className="h-4 w-4" />
+                        <span>Edit</span>
+                      </button>
+                      <button className="bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200">
+                        View
+                      </button>
+                      <button className="bg-red-100 text-red-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-200">
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          {/* Empty State */}
+          {filteredOrganizations.length === 0 && (
+            <div className="text-center py-12">
+              <BuildingIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No organizations found</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {organizations.length === 0 
+                  ? 'Get started by adding your first organization.' 
+                  : 'Try adjusting your search terms.'
+                }
+              </p>
+            </div>
+          )}
+        </div>
 
-      {/* Locations Tab */}
-      {selectedTab === 'locations' && (
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Organization
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Address
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedLocations.map(location => (
-                  <tr key={location.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <MapPinIcon className="h-5 w-5 text-blue-600" />
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {location.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {location.id}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getOrgName(location.orgId)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {location.address}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {location.city}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
-                        {location.type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(location.status)}`}>
-                        {location.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredLocations.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No locations match the current filters
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div className="flex-1 flex justify-between sm:hidden">
+              <button
+                onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                Next
+              </button>
+            </div>
+            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
+                  <span className="font-medium">{Math.min(endIndex, filteredOrganizations.length)}</span> of{' '}
+                  <span className="font-medium">{filteredOrganizations.length}</span> results
+                </p>
               </div>
-            ) : (
-              <PaginationControls totalItems={filteredLocations.length} />
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Providers Tab */}
-      {selectedTab === 'providers' && (
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Provider
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Organization
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Specialty
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedProviders.map(provider => (
-                  <tr key={provider.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                            <StethoscopeIcon className="h-5 w-5 text-green-600" />
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {provider.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {provider.id}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getOrgName(provider.orgId)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">
-                        {provider.specialty}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {provider.phone}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {provider.email}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(provider.status)}`}>
-                        {provider.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredProviders.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No providers match the current filters
+              <div>
+                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    Previous
+                  </button>
+                  
+                  {/* Page Numbers */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          currentPage === pageNum
+                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  
+                  <button
+                    onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    Next
+                  </button>
+                </nav>
               </div>
-            ) : (
-              <PaginationControls totalItems={filteredProviders.length} />
-            )}
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Staff Tab */}
-      {selectedTab === 'staff' && (
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Staff Member
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Organization
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedStaff.map(member => (
-                  <tr key={member.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                            <UserIcon className="h-5 w-5 text-purple-600" />
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {member.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {member.id}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getOrgName(member.orgId)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                        {member.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {member.department}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {member.phone}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {member.email}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(member.status)}`}>
-                        {member.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredStaff.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No staff members match the current filters
-              </div>
-            ) : (
-              <PaginationControls totalItems={filteredStaff.length} />
-            )}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
