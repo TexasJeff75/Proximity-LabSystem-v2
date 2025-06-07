@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIcon, PhoneIcon, MailIcon, EditIcon, TrashIcon, UsersIcon, RefreshCwIcon, XIcon, SaveIcon, HeartHandshakeIcon, CalendarIcon, DollarSignIcon, FileTextIcon, TrendingUpIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon } from 'lucide-react';
 import { fetchOrganizationsWithReps, OrganizationWithReps } from '../services/organizationService';
+import { fetchLocationsWithOrganizations, LocationWithOrganization } from '../services/locationService';
 
 // Mock data for interactions, contracts, and other LRM-specific data
 const interactions = [
@@ -74,6 +75,7 @@ const contracts = [
 
 export function LRM() {
   const [organizations, setOrganizations] = useState<OrganizationWithReps[]>([]);
+  const [locations, setLocations] = useState<LocationWithOrganization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState('organizations');
@@ -84,16 +86,20 @@ export function LRM() {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    loadOrganizations();
+    loadData();
   }, []);
 
-  const loadOrganizations = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await fetchOrganizationsWithReps();
-      setOrganizations(data);
+      const [orgsData, locationsData] = await Promise.all([
+        fetchOrganizationsWithReps(),
+        fetchLocationsWithOrganizations()
+      ]);
+      setOrganizations(orgsData);
+      setLocations(locationsData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load organizations');
+      setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -106,6 +112,15 @@ export function LRM() {
     (org.org_reps?.sales_rep && org.org_reps.sales_rep.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (org.org_reps?.account_manager && org.org_reps.account_manager.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (org.org_reps?.sales_executive && org.org_reps.sales_executive.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const filteredLocations = locations.filter(location =>
+    location.location_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    location.location_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (location.organizations?.name && location.organizations.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (location.organizations?.org_code && location.organizations.org_code.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (location.city && location.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (location.state && location.state.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const filteredInteractions = interactions.filter(interaction => {
@@ -124,18 +139,30 @@ export function LRM() {
   });
 
   // Pagination
-  const totalPages = Math.ceil(
-    (selectedTab === 'organizations' ? filteredOrganizations.length :
-     selectedTab === 'interactions' ? filteredInteractions.length :
-     filteredContracts.length) / itemsPerPage
-  );
-  
+  const getCurrentData = () => {
+    switch (selectedTab) {
+      case 'organizations':
+        return filteredOrganizations;
+      case 'locations':
+        return filteredLocations;
+      case 'interactions':
+        return filteredInteractions;
+      case 'contracts':
+        return filteredContracts;
+      default:
+        return [];
+    }
+  };
+
+  const currentData = getCurrentData();
+  const totalPages = Math.ceil(currentData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   
-  const currentOrganizations = filteredOrganizations.slice(startIndex, endIndex);
-  const currentInteractions = filteredInteractions.slice(startIndex, endIndex);
-  const currentContracts = filteredContracts.slice(startIndex, endIndex);
+  const currentOrganizations = selectedTab === 'organizations' ? currentData.slice(startIndex, endIndex) as OrganizationWithReps[] : [];
+  const currentLocations = selectedTab === 'locations' ? currentData.slice(startIndex, endIndex) as LocationWithOrganization[] : [];
+  const currentInteractions = selectedTab === 'interactions' ? currentData.slice(startIndex, endIndex) : [];
+  const currentContracts = selectedTab === 'contracts' ? currentData.slice(startIndex, endIndex) : [];
 
   const getOrgName = (orgId: string) => {
     return organizations.find(org => org.id === orgId)?.name || 'Unknown Organization';
@@ -184,7 +211,7 @@ export function LRM() {
       <div className="bg-red-50 border border-red-200 rounded-md p-4">
         <p className="text-red-800">Error: {error}</p>
         <button 
-          onClick={loadOrganizations}
+          onClick={loadData}
           className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
           Retry
@@ -208,7 +235,7 @@ export function LRM() {
           </div>
           <div className="flex space-x-3">
             <button
-              onClick={loadOrganizations}
+              onClick={loadData}
               disabled={loading}
               className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-50 disabled:opacity-50"
             >
@@ -230,6 +257,7 @@ export function LRM() {
           <nav className="-mb-px flex space-x-8">
             {[
               { key: 'organizations', label: 'Organizations', icon: BuildingIcon },
+              { key: 'locations', label: 'Locations', icon: MapPinIcon },
               { key: 'interactions', label: 'Interactions', icon: UserIcon },
               { key: 'contracts', label: 'Contracts', icon: FileTextIcon }
             ].map(tab => {
@@ -392,6 +420,123 @@ export function LRM() {
                 <p className="mt-1 text-sm text-gray-500">
                   {organizations.length === 0 
                     ? 'No organizations available.' 
+                    : 'Try adjusting your search terms.'
+                  }
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Locations Tab */}
+      {selectedTab === 'locations' && (
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-medium text-gray-900">Organization Locations</h2>
+              <span className="text-sm text-gray-500">
+                {filteredLocations.length} of {locations.length} locations
+              </span>
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Location
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Organization
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Address
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    City, State
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ZIP
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Phone
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fax
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {currentLocations.map(location => (
+                  <tr key={location.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                            <MapPinIcon className="h-5 w-5 text-green-600" />
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {location.location_name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            Code: {location.location_code}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {location.organizations?.name || '-'}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {location.organizations?.org_code || '-'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                      <div className="truncate" title={location.street || ''}>
+                        {location.street || '-'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {location.city && location.state ? `${location.city}, ${location.state}` : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {location.zip || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {location.phone || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {location.fax || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button className="text-blue-600 hover:text-blue-900 mr-3">
+                        Edit
+                      </button>
+                      <button className="text-green-600 hover:text-green-900">
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            
+            {/* Empty State */}
+            {filteredLocations.length === 0 && (
+              <div className="text-center py-12">
+                <MapPinIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No locations found</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  {locations.length === 0 
+                    ? 'No locations available.' 
                     : 'Try adjusting your search terms.'
                   }
                 </p>
@@ -615,16 +760,8 @@ export function LRM() {
             <div>
               <p className="text-sm text-gray-700">
                 Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-                <span className="font-medium">{Math.min(endIndex, 
-                  selectedTab === 'organizations' ? filteredOrganizations.length :
-                  selectedTab === 'interactions' ? filteredInteractions.length :
-                  filteredContracts.length
-                )}</span> of{' '}
-                <span className="font-medium">
-                  {selectedTab === 'organizations' ? filteredOrganizations.length :
-                   selectedTab === 'interactions' ? filteredInteractions.length :
-                   filteredContracts.length}
-                </span> results
+                <span className="font-medium">{Math.min(endIndex, currentData.length)}</span> of{' '}
+                <span className="font-medium">{currentData.length}</span> results
               </p>
             </div>
             <div>

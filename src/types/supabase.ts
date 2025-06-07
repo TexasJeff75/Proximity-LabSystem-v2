@@ -138,6 +138,50 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      locations: {
+        Row: {
+          id: string
+          organization_id: string
+          location_code: string
+          location_name: string
+          street: string | null
+          city: string | null
+          state: string | null
+          zip: string | null
+          phone: string | null
+          fax: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          location_code: string
+          location_name: string
+          street?: string | null
+          city?: string | null
+          state?: string | null
+          zip?: string | null
+          phone?: string | null
+          fax?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          location_code?: string
+          location_name?: string
+          street?: string | null
+          city?: string | null
+          state?: string | null
+          zip?: string | null
+          phone?: string | null
+          fax?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
