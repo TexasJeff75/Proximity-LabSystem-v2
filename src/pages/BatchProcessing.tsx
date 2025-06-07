@@ -54,6 +54,28 @@ const mockBatches: Batch[] = [
   }
 ];
 
+// Helper function to calculate priority based on collection date
+const calculatePriority = (collectionDate: string): 'High' | 'Normal' | 'Urgent' | 'Low' => {
+  const now = new Date();
+  const collection = new Date(collectionDate);
+  
+  // Calculate the difference in days
+  const diffInTime = now.getTime() - collection.getTime();
+  const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+  
+  // Apply priority logic based on age
+  if (diffInDays === 0 || diffInDays === 1) {
+    return 'Normal';
+  } else if (diffInDays === 3) {
+    return 'High';
+  } else if (diffInDays >= 4) {
+    return 'Urgent';
+  } else {
+    // For diffInDays === 2, default to Normal
+    return 'Normal';
+  }
+};
+
 export function BatchProcessing() {
   const [activeTab, setActiveTab] = useState('pipeline');
   const [orders, setOrders] = useState<BatchOrder[]>([]);
@@ -79,12 +101,12 @@ export function BatchProcessing() {
     try {
       setLoading(true);
       const data = await fetchOrders();
-      // Add priority field and filter for batch processing
+      // Add priority field based on collection date and filter for batch processing
       const batchOrders: BatchOrder[] = data
         .filter(order => order.status !== 'Final')
         .map(order => ({
           ...order,
-          priority: Math.random() > 0.7 ? 'High' : Math.random() > 0.5 ? 'Urgent' : Math.random() > 0.3 ? 'Normal' : 'Low'
+          priority: calculatePriority(order.collection_date)
         }));
       setOrders(batchOrders);
     } catch (err) {
