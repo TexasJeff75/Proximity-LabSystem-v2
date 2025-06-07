@@ -12,7 +12,8 @@ import {
   Role, 
   AuditLog, 
   FeatureRequest, 
-  Test 
+  Test,
+  DevelopmentLogEntry
 } from '../types';
 
 // Mock locations data
@@ -1149,6 +1150,218 @@ export const tests: Test[] = [
     price: '$75.00',
     turnaroundTime: '24-48 hours',
     status: 'Inactive'
+  }
+];
+
+// Mock development log data
+export const developmentLog: DevelopmentLogEntry[] = [
+  {
+    id: 'DEV001',
+    type: 'Feature',
+    title: 'Laboratory Relationship Management (LRM) System',
+    description: 'Comprehensive CRM-like system for managing client organizations, interactions, contracts, and sales pipeline',
+    status: 'Implemented',
+    priority: 'High',
+    date: '2024-01-01',
+    implementedDate: '2024-01-15',
+    assignee: 'Development Team',
+    relatedFiles: ['src/pages/LRM.tsx', 'src/services/organizationService.ts'],
+    dependencies: ['Organizations table', 'Locations table', 'Contacts table'],
+    notes: 'Full CRM functionality with organization management, location tracking, and contact management'
+  },
+  {
+    id: 'DEV002',
+    type: 'Structural Change',
+    title: 'Role-Based Access Control (RBAC) System',
+    description: 'Implement role-based permissions for Sales Executive, Sales Rep, and Account Manager roles with appropriate access controls',
+    status: 'Implemented',
+    priority: 'High',
+    date: '2024-01-02',
+    implementedDate: '2024-01-15',
+    assignee: 'Security Team',
+    relatedFiles: ['src/pages/Settings.tsx', 'src/utils/mockData.ts'],
+    dependencies: ['User authentication system'],
+    notes: 'Three-tier role system with granular permissions for LRM and laboratory functions'
+  },
+  {
+    id: 'DEV003',
+    type: 'Database Migration',
+    title: 'Organizations Table Enhancement',
+    description: 'Enhanced organizations table with comprehensive fields for medical director, CLIA, address, and contact information',
+    status: 'Implemented',
+    priority: 'High',
+    date: '2024-01-03',
+    implementedDate: '2024-01-15',
+    assignee: 'Database Team',
+    relatedFiles: ['supabase/migrations/*.sql', 'src/types/supabase.ts'],
+    dependencies: ['Supabase setup'],
+    notes: 'Added org_reps relationship table for sales team assignments'
+  },
+  {
+    id: 'DEV004',
+    type: 'Database Migration',
+    title: 'Locations Table Implementation',
+    description: 'Created locations table with foreign key relationship to organizations, including address and contact details',
+    status: 'Implemented',
+    priority: 'High',
+    date: '2024-01-04',
+    implementedDate: '2024-01-15',
+    assignee: 'Database Team',
+    relatedFiles: ['supabase/migrations/20250607043903_late_marsh.sql', 'src/services/locationService.ts'],
+    dependencies: ['Organizations table'],
+    notes: 'Supports multiple locations per organization with unique location codes'
+  },
+  {
+    id: 'DEV005',
+    type: 'Database Migration',
+    title: 'Contacts Table Implementation',
+    description: 'Created contacts table for managing provider and staff contacts associated with organizations and locations',
+    status: 'Implemented',
+    priority: 'High',
+    date: '2024-01-05',
+    implementedDate: '2024-01-15',
+    assignee: 'Database Team',
+    relatedFiles: ['supabase/migrations/20250607044620_morning_mode.sql', 'src/services/contactService.ts'],
+    dependencies: ['Organizations table', 'Locations table'],
+    notes: 'Includes provider NPI tracking and many-to-many location relationships'
+  },
+  {
+    id: 'DEV006',
+    type: 'Feature',
+    title: 'Order Import System',
+    description: 'CSV import functionality for bulk order processing with duplicate detection and validation',
+    status: 'Implemented',
+    priority: 'Medium',
+    date: '2024-01-06',
+    implementedDate: '2024-01-15',
+    assignee: 'Frontend Team',
+    relatedFiles: ['src/components/OrderImporter.tsx', 'src/utils/csvParser.ts'],
+    dependencies: ['Orders table', 'Supabase integration'],
+    notes: 'Supports CSV upload with automatic deduplication and error handling'
+  },
+  {
+    id: 'DEV007',
+    type: 'UI Enhancement',
+    title: 'Locations Management Modal',
+    description: 'Interactive modal for managing organization locations with inline editing capabilities',
+    status: 'Implemented',
+    priority: 'Medium',
+    date: '2024-01-07',
+    implementedDate: '2024-01-15',
+    assignee: 'Frontend Team',
+    relatedFiles: ['src/components/LocationsModal.tsx'],
+    dependencies: ['Locations service', 'LRM page'],
+    notes: 'Full CRUD operations with real-time validation and error handling'
+  },
+  {
+    id: 'DEV008',
+    type: 'UI Enhancement',
+    title: 'Contacts Management Modal',
+    description: 'Interactive modal for managing organization contacts with provider NPI tracking',
+    status: 'Implemented',
+    priority: 'Medium',
+    date: '2024-01-08',
+    implementedDate: '2024-01-15',
+    assignee: 'Frontend Team',
+    relatedFiles: ['src/components/ContactsModal.tsx'],
+    dependencies: ['Contacts service', 'LRM page'],
+    notes: 'Supports provider NPI validation and location code assignment'
+  },
+  {
+    id: 'DEV009',
+    type: 'Feature',
+    title: 'Organization Statistics Integration',
+    description: 'Real-time location and contact counts displayed in organization listings',
+    status: 'Implemented',
+    priority: 'Low',
+    date: '2024-01-09',
+    implementedDate: '2024-01-15',
+    assignee: 'Backend Team',
+    relatedFiles: ['src/services/organizationService.ts'],
+    dependencies: ['Locations table', 'Contacts table'],
+    notes: 'Optimized queries to prevent N+1 problems with count aggregation'
+  },
+  {
+    id: 'DEV010',
+    type: 'Feature',
+    title: 'Development Log System',
+    description: 'PRD-style tracking system for features, structural changes, and implementation status',
+    status: 'Implemented',
+    priority: 'Medium',
+    date: '2024-01-10',
+    implementedDate: '2024-01-15',
+    assignee: 'Development Team',
+    relatedFiles: ['src/pages/Settings.tsx', 'src/types/index.ts', 'src/utils/mockData.ts'],
+    dependencies: ['Settings page'],
+    notes: 'Comprehensive tracking of all development activities with status, priority, and dependency management'
+  },
+  {
+    id: 'DEV011',
+    type: 'Feature',
+    title: 'Advanced Order Filtering System',
+    description: 'Multi-criteria filtering for orders with status, organization, provider, test method, and date range filters',
+    status: 'Planned',
+    priority: 'Medium',
+    date: '2024-01-16',
+    assignee: 'Frontend Team',
+    relatedFiles: ['src/pages/Samples.tsx'],
+    dependencies: ['Orders table'],
+    notes: 'Enhanced search and filter capabilities for better order management'
+  },
+  {
+    id: 'DEV012',
+    type: 'Security Update',
+    title: 'Row Level Security (RLS) Implementation',
+    description: 'Comprehensive RLS policies for all database tables to ensure data security and access control',
+    status: 'Implemented',
+    priority: 'High',
+    date: '2024-01-11',
+    implementedDate: '2024-01-15',
+    assignee: 'Security Team',
+    relatedFiles: ['supabase/migrations/*.sql'],
+    dependencies: ['All database tables'],
+    notes: 'Applied to orders, organizations, locations, contacts, and org_reps tables'
+  },
+  {
+    id: 'DEV013',
+    type: 'Feature',
+    title: 'Messaging System Enhancement',
+    description: 'Real-time messaging system for sample-specific communications between lab staff and providers',
+    status: 'Implemented',
+    priority: 'Medium',
+    date: '2024-01-12',
+    implementedDate: '2024-01-15',
+    assignee: 'Frontend Team',
+    relatedFiles: ['src/components/MessagingContext.tsx', 'src/components/MessagingPanel.tsx', 'src/components/MessageThread.tsx'],
+    dependencies: ['Sample management system'],
+    notes: 'Context-based messaging with unread indicators and threaded conversations'
+  },
+  {
+    id: 'DEV014',
+    type: 'Feature',
+    title: 'Automation Dashboard',
+    description: 'Comprehensive automation management for Opentrons robots, protocols, and run history',
+    status: 'Implemented',
+    priority: 'Medium',
+    date: '2024-01-13',
+    implementedDate: '2024-01-15',
+    assignee: 'Automation Team',
+    relatedFiles: ['src/pages/Automation.tsx'],
+    dependencies: ['Robot integration APIs'],
+    notes: 'Real-time robot status monitoring and protocol management'
+  },
+  {
+    id: 'DEV015',
+    type: 'UI Enhancement',
+    title: 'Responsive Design Implementation',
+    description: 'Mobile-responsive design across all pages with optimized layouts for different screen sizes',
+    status: 'In Progress',
+    priority: 'Medium',
+    date: '2024-01-14',
+    assignee: 'Frontend Team',
+    relatedFiles: ['src/pages/*.tsx', 'src/components/*.tsx'],
+    dependencies: ['Tailwind CSS'],
+    notes: 'Progressive enhancement for mobile and tablet devices'
   }
 ];
 

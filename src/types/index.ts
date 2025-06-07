@@ -273,6 +273,22 @@ export interface Test {
   status: string;
 }
 
+// Development Log types
+export interface DevelopmentLogEntry {
+  id: string;
+  type: 'Feature' | 'Structural Change' | 'Database Migration' | 'UI Enhancement' | 'Bug Fix' | 'Security Update';
+  title: string;
+  description: string;
+  status: 'Implemented' | 'In Progress' | 'Planned' | 'On Hold' | 'Cancelled';
+  priority: 'High' | 'Medium' | 'Low';
+  date: string;
+  implementedDate?: string;
+  assignee?: string;
+  relatedFiles?: string[];
+  dependencies?: string[];
+  notes?: string;
+}
+
 // Raw data types for Supabase integration
 export interface RawOrderData {
   accession_id: string;
