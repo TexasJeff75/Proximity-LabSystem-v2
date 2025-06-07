@@ -3,6 +3,7 @@ import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIc
 import { fetchOrganizationsWithReps, OrganizationWithReps } from '../services/organizationService';
 import { fetchLocationsWithOrganizations, LocationWithOrganization } from '../services/locationService';
 import { LocationsModal } from '../components/LocationsModal';
+import { ContactsModal } from '../components/ContactsModal';
 
 // Mock data for interactions, contracts, and other LRM-specific data
 const interactions = [
@@ -84,6 +85,7 @@ export function LRM() {
   const [selectedOrg, setSelectedOrg] = useState<OrganizationWithReps | null>(null);
   const [showNewInteractionModal, setShowNewInteractionModal] = useState(false);
   const [showLocationsModal, setShowLocationsModal] = useState<{ organizationId: string; organizationName: string } | null>(null);
+  const [showContactsModal, setShowContactsModal] = useState<{ organizationCode: string; organizationName: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -203,6 +205,13 @@ export function LRM() {
   const handleLocationsClick = (org: OrganizationWithReps) => {
     setShowLocationsModal({
       organizationId: org.id,
+      organizationName: org.name
+    });
+  };
+
+  const handleContactsClick = (org: OrganizationWithReps) => {
+    setShowContactsModal({
+      organizationCode: org.org_code,
       organizationName: org.name
     });
   };
@@ -414,12 +423,15 @@ export function LRM() {
                       </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
+                      <button
+                        onClick={() => handleContactsClick(org)}
+                        className="flex items-center hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                      >
                         <UsersIcon className="h-4 w-4 text-gray-400 mr-1" />
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-medium text-blue-600 hover:text-blue-800">
                           {org.contact_count || 0}
                         </span>
-                      </div>
+                      </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {org.org_reps?.sales_rep || '-'}
@@ -1010,6 +1022,15 @@ export function LRM() {
           organizationId={showLocationsModal.organizationId}
           organizationName={showLocationsModal.organizationName}
           onClose={() => setShowLocationsModal(null)}
+        />
+      )}
+
+      {/* Contacts Modal */}
+      {showContactsModal && (
+        <ContactsModal
+          organizationCode={showContactsModal.organizationCode}
+          organizationName={showContactsModal.organizationName}
+          onClose={() => setShowContactsModal(null)}
         />
       )}
     </div>

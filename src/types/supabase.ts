@@ -182,6 +182,70 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      contacts: {
+        Row: {
+          id: string
+          first_name: string
+          last_name: string
+          provider_npi: string | null
+          organization_code: string
+          organization_name: string
+          location_code: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          first_name: string
+          last_name: string
+          provider_npi?: string | null
+          organization_code: string
+          organization_name: string
+          location_code: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          first_name?: string
+          last_name?: string
+          provider_npi?: string | null
+          organization_code?: string
+          organization_name?: string
+          location_code?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      contact_locations: {
+        Row: {
+          id: string
+          contact_id: string
+          organization_code: string
+          organization_name: string
+          location_code: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          contact_id: string
+          organization_code: string
+          organization_name: string
+          location_code: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          contact_id?: string
+          organization_code?: string
+          organization_name?: string
+          location_code?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
