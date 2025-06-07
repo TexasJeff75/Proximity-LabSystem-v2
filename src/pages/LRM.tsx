@@ -287,7 +287,7 @@ export function LRM() {
                     Organization
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Medical Director
+                    Lab Director
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Location
@@ -689,7 +689,7 @@ export function LRM() {
                       <span className="font-medium">{selectedOrg.org_code}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Medical Director:</span>
+                      <span className="text-gray-500">Lab Director:</span>
                       <span className="font-medium">{selectedOrg.medical_director || '-'}</span>
                     </div>
                     <div className="flex justify-between">
