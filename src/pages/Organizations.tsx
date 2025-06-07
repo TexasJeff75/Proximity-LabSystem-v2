@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIcon, PhoneIcon, MailIcon, EditIcon, TrashIcon, UsersIcon, RefreshCwIcon } from 'lucide-react';
-import { fetchOrganizations, Organization } from '../services/organizationService';
+import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIcon, PhoneIcon, MailIcon, EditIcon, TrashIcon, UsersIcon, RefreshCwIcon, XIcon, SaveIcon } from 'lucide-react';
+import { fetchOrganizations, Organization, updateOrganization } from '../services/organizationService';
+
+interface EditingOrganization extends Organization {
+  isEditing?: boolean;
+}
 
 export function Organizations() {
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [organizations, setOrganizations] = useState<EditingOrganization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTab, setSelectedTab] = useState('organizations');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Organization>>({});
+  const [saving, setSaving] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -39,6 +45,54 @@ export function Organizations() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentOrganizations = filteredOrganizations.slice(startIndex, endIndex);
+
+  const handleEdit = (org: Organization) => {
+    setEditingId(org.id);
+    setEditForm({
+      name: org.name,
+      medical_director: org.medical_director || '',
+      clia: org.clia || '',
+      street: org.street || '',
+      city: org.city || '',
+      state: org.state || '',
+      zip: org.zip || '',
+      phone: org.phone || '',
+      fax: org.fax || ''
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditForm({});
+  };
+
+  const handleSaveEdit = async (orgId: string) => {
+    try {
+      setSaving(true);
+      await updateOrganization(orgId, editForm);
+      
+      // Update the local state
+      setOrganizations(prev => prev.map(org => 
+        org.id === orgId 
+          ? { ...org, ...editForm, updated_at: new Date().toISOString() }
+          : org
+      ));
+      
+      setEditingId(null);
+      setEditForm({});
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update organization');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof Organization, value: string) => {
+    setEditForm(prev => ({
+      ...prev,
+      [field]: value || null
+    }));
+  };
 
   if (loading) {
     return (
@@ -130,13 +184,22 @@ export function Organizations() {
                   CLIA
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Address
+                  Street
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
+                  City
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
+                  State
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Zip
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Phone
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Fax
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -154,9 +217,19 @@ export function Organizations() {
                         </div>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {org.name}
-                        </div>
+                        {editingId === org.id ? (
+                          <input
+                            type="text"
+                            value={editForm.name || ''}
+                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            className="text-sm font-medium text-gray-900 border border-gray-300 rounded px-2 py-1 w-full"
+                            placeholder="Organization name"
+                          />
+                        ) : (
+                          <div className="text-sm font-medium text-gray-900">
+                            {org.name}
+                          </div>
+                        )}
                         <div className="text-sm text-gray-500">
                           Code: {org.org_code}
                         </div>
@@ -164,59 +237,143 @@ export function Organizations() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {org.medical_director || '-'}
+                    {editingId === org.id ? (
+                      <input
+                        type="text"
+                        value={editForm.medical_director || ''}
+                        onChange={(e) => handleInputChange('medical_director', e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        placeholder="Medical director"
+                      />
+                    ) : (
+                      org.medical_director || '-'
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {org.clia || '-'}
+                    {editingId === org.id ? (
+                      <input
+                        type="text"
+                        value={editForm.clia || ''}
+                        onChange={(e) => handleInputChange('clia', e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        placeholder="CLIA"
+                      />
+                    ) : (
+                      org.clia || '-'
+                    )}
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {org.street && (
-                        <div>{org.street}</div>
-                      )}
-                      {(org.city || org.state || org.zip) && (
-                        <div className="text-gray-500">
-                          {[org.city, org.state, org.zip].filter(Boolean).join(', ')}
-                        </div>
-                      )}
-                      {!org.street && !org.city && !org.state && !org.zip && (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingId === org.id ? (
+                      <input
+                        type="text"
+                        value={editForm.street || ''}
+                        onChange={(e) => handleInputChange('street', e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        placeholder="Street address"
+                      />
+                    ) : (
+                      org.street || '-'
+                    )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="space-y-1">
-                      {org.phone && (
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <PhoneIcon className="h-4 w-4" />
-                          <span>{org.phone}</span>
-                        </div>
-                      )}
-                      {org.fax && (
-                        <div className="text-sm text-gray-600">
-                          Fax: {org.fax}
-                        </div>
-                      )}
-                      {!org.phone && !org.fax && (
-                        <span className="text-gray-400 text-sm">-</span>
-                      )}
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingId === org.id ? (
+                      <input
+                        type="text"
+                        value={editForm.city || ''}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        placeholder="City"
+                      />
+                    ) : (
+                      org.city || '-'
+                    )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {org.created_at ? new Date(org.created_at).toLocaleDateString() : '-'}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingId === org.id ? (
+                      <input
+                        type="text"
+                        value={editForm.state || ''}
+                        onChange={(e) => handleInputChange('state', e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        placeholder="State"
+                      />
+                    ) : (
+                      org.state || '-'
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingId === org.id ? (
+                      <input
+                        type="text"
+                        value={editForm.zip || ''}
+                        onChange={(e) => handleInputChange('zip', e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        placeholder="ZIP code"
+                      />
+                    ) : (
+                      org.zip || '-'
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingId === org.id ? (
+                      <input
+                        type="text"
+                        value={editForm.phone || ''}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        placeholder="Phone number"
+                      />
+                    ) : (
+                      org.phone || '-'
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingId === org.id ? (
+                      <input
+                        type="text"
+                        value={editForm.fax || ''}
+                        onChange={(e) => handleInputChange('fax', e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        placeholder="Fax number"
+                      />
+                    ) : (
+                      org.fax || '-'
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-                      <button className="bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center space-x-1">
-                        <EditIcon className="h-4 w-4" />
-                        <span>Edit</span>
-                      </button>
-                      <button className="bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200">
-                        View
-                      </button>
-                      <button className="bg-red-100 text-red-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-200">
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
+                      {editingId === org.id ? (
+                        <>
+                          <button
+                            onClick={() => handleSaveEdit(org.id)}
+                            disabled={saving}
+                            className="bg-green-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-green-700 flex items-center space-x-1 disabled:opacity-50"
+                          >
+                            <SaveIcon className="h-4 w-4" />
+                            <span>{saving ? 'Saving...' : 'Save'}</span>
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            disabled={saving}
+                            className="bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 disabled:opacity-50"
+                          >
+                            <XIcon className="h-4 w-4" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleEdit(org)}
+                            className="bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center space-x-1"
+                          >
+                            <EditIcon className="h-4 w-4" />
+                            <span>Edit</span>
+                          </button>
+                          <button className="bg-red-100 text-red-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-200">
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
