@@ -1,5 +1,7 @@
 import React, { useState, Component } from 'react';
-import { FileTextIcon, EditIcon, CopyIcon, PlusIcon, SearchIcon, ClipboardListIcon, UsersIcon, LockIcon, ShieldIcon, TrashIcon, AlertCircleIcon, LightbulbIcon, FilterIcon, XIcon, CheckIcon } from 'lucide-react';
+import { FileTextIcon, EditIcon, CopyIcon, PlusIcon, SearchIcon, ClipboardListIcon, UsersIcon, LockIcon, ShieldIcon, TrashIcon, AlertCircleIcon, LightbulbIcon, FilterIcon, XIcon, CheckIcon, CodeIcon } from 'lucide-react';
+import { developmentLog } from '../utils/mockData';
+
 // Mock roles and permissions data
 const roles = [{
   id: 'ROLE001',
@@ -177,6 +179,7 @@ const roles = [{
     }
   }
 }];
+
 // Mock audit logs
 const auditLogs = [{
   id: 'LOG001',
@@ -224,6 +227,7 @@ const auditLogs = [{
   details: 'Modified permissions for Sales Representative role',
   ipAddress: '192.168.1.45'
 }];
+
 // Mock feature requests data
 const featureRequests = [{
   id: 'FR001',
@@ -380,6 +384,7 @@ const tests = [{
   turnaroundTime: '24-48 hours',
   status: 'Inactive'
 }];
+
 // RBAC Management Component
 const RBACManagement = () => {
   const [showNewRoleModal, setShowNewRoleModal] = useState(false);
@@ -511,6 +516,7 @@ const RBACManagement = () => {
       </div>
     </div>;
 };
+
 export function Settings() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
@@ -527,6 +533,12 @@ export function Settings() {
     description: '',
     priority: 'Medium'
   });
+
+  // Development log state
+  const [devLogSearchTerm, setDevLogSearchTerm] = useState('');
+  const [devLogTypeFilter, setDevLogTypeFilter] = useState('All');
+  const [devLogStatusFilter, setDevLogStatusFilter] = useState('All');
+
   const filteredTests = tests.filter(test => {
     const matchesSearch = test.name.toLowerCase().includes(searchTerm.toLowerCase()) || test.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'All' || test.category === categoryFilter;
@@ -539,18 +551,34 @@ export function Settings() {
     const matchesPriority = priorityFilter === 'All' || feature.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
   });
+
+  // Filter development log
+  const filteredDevLog = developmentLog.filter(entry => {
+    const matchesSearch = entry.title.toLowerCase().includes(devLogSearchTerm.toLowerCase()) || 
+                         entry.description.toLowerCase().includes(devLogSearchTerm.toLowerCase());
+    const matchesType = devLogTypeFilter === 'All' || entry.type === devLogTypeFilter;
+    const matchesStatus = devLogStatusFilter === 'All' || entry.status === devLogStatusFilter;
+    return matchesSearch && matchesType && matchesStatus;
+  });
+
   const categories = ['All', ...Array.from(new Set(tests.map(test => test.category)))];
+  
   // Get color for feature status
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Completed':
+      case 'Implemented':
         return 'bg-green-100 text-green-800';
       case 'In Progress':
         return 'bg-blue-100 text-blue-800';
       case 'Pending':
+      case 'Planned':
         return 'bg-yellow-100 text-yellow-800';
       case 'Rejected':
+      case 'Cancelled':
         return 'bg-red-100 text-red-800';
+      case 'On Hold':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -568,6 +596,27 @@ export function Settings() {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  // Get color for development log type
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'Feature':
+        return 'bg-blue-100 text-blue-800';
+      case 'Structural Change':
+        return 'bg-purple-100 text-purple-800';
+      case 'Database Migration':
+        return 'bg-green-100 text-green-800';
+      case 'UI Enhancement':
+        return 'bg-orange-100 text-orange-800';
+      case 'Bug Fix':
+        return 'bg-red-100 text-red-800';
+      case 'Security Update':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   // Handle new feature submission
   const handleFeatureSubmit = () => {
     // In a real app, this would add the feature to the database
@@ -607,6 +656,10 @@ export function Settings() {
           <button onClick={() => setActiveTab('features')} className={`py-4 px-1 font-medium text-sm border-b-2 flex items-center ${activeTab === 'features' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
             <LightbulbIcon className="h-4 w-4 mr-2" />
             Feature Requests
+          </button>
+          <button onClick={() => setActiveTab('development')} className={`py-4 px-1 font-medium text-sm border-b-2 flex items-center ${activeTab === 'development' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+            <CodeIcon className="h-4 w-4 mr-2" />
+            Development Log
           </button>
           <button onClick={() => setActiveTab('rbac')} className={`py-4 px-1 font-medium text-sm border-b-2 flex items-center ${activeTab === 'rbac' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
             <LockIcon className="h-4 w-4 mr-2" />
@@ -841,6 +894,166 @@ export function Settings() {
             </div>
           </div>
         </div>}
+
+      {/* Development Log Tab */}
+      {activeTab === 'development' && <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">
+                Development Log
+              </h2>
+              <p className="text-gray-600">
+                Track development progress, features, and system changes
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">
+                {filteredDevLog.length} of {developmentLog.length} entries
+              </span>
+            </div>
+          </div>
+
+          {/* Filters and Search */}
+          <div className="flex flex-wrap gap-4">
+            <div className="relative flex-1">
+              <SearchIcon className="h-5 w-5 absolute left-3 top-3 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search development log..." 
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                value={devLogSearchTerm} 
+                onChange={e => setDevLogSearchTerm(e.target.value)} 
+              />
+            </div>
+            <select 
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              value={devLogTypeFilter} 
+              onChange={e => setDevLogTypeFilter(e.target.value)}
+            >
+              <option value="All">All Types</option>
+              <option value="Feature">Feature</option>
+              <option value="Structural Change">Structural Change</option>
+              <option value="Database Migration">Database Migration</option>
+              <option value="UI Enhancement">UI Enhancement</option>
+              <option value="Bug Fix">Bug Fix</option>
+              <option value="Security Update">Security Update</option>
+            </select>
+            <select 
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              value={devLogStatusFilter} 
+              onChange={e => setDevLogStatusFilter(e.target.value)}
+            >
+              <option value="All">All Status</option>
+              <option value="Implemented">Implemented</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Planned">Planned</option>
+              <option value="On Hold">On Hold</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          {/* Development Log Table */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Entry
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Priority
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Assignee
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredDevLog.map(entry => (
+                    <tr key={entry.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                              <CodeIcon className="h-5 w-5 text-indigo-600" />
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {entry.title}
+                            </div>
+                            <div className="text-sm text-gray-500 max-w-md">
+                              {entry.description}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1">
+                              {entry.id}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getTypeColor(entry.type)}`}>
+                          {entry.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(entry.status)}`}>
+                          {entry.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(entry.priority)}`}>
+                          {entry.priority}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div>{entry.date}</div>
+                        {entry.implementedDate && entry.implementedDate !== entry.date && (
+                          <div className="text-xs text-gray-500">
+                            Implemented: {entry.implementedDate}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {entry.assignee || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button className="text-blue-600 hover:text-blue-900 mr-3">
+                          View Details
+                        </button>
+                        {entry.relatedFiles && entry.relatedFiles.length > 0 && (
+                          <button className="text-green-600 hover:text-green-900">
+                            Files ({entry.relatedFiles.length})
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              {filteredDevLog.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No development log entries match the current filters
+                </div>
+              )}
+            </div>
+          </div>
+        </div>}
+
       {/* RBAC Tab with Admin Check */}
       {activeTab === 'rbac' && <div>{isAdmin ? <RBACManagement /> : <AdminAccessDenied />}</div>}
       {/* New Feature Request Modal */}
