@@ -325,6 +325,64 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      protocols: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          duration: string | null
+          robot_compatibility: string[] | null
+          protocol_type: string | null
+          plate_format: string | null
+          sample_capacity: number | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          duration?: string | null
+          robot_compatibility?: string[] | null
+          protocol_type?: string | null
+          plate_format?: string | null
+          sample_capacity?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          duration?: string | null
+          robot_compatibility?: string[] | null
+          protocol_type?: string | null
+          plate_format?: string | null
+          sample_capacity?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      test_method_protocols: {
+        Row: {
+          test_method_id: string
+          protocol_id: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          test_method_id: string
+          protocol_id: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          test_method_id?: string
+          protocol_id?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
