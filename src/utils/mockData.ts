@@ -1,5 +1,4 @@
 import { 
-  Organization, 
   Location, 
   Provider, 
   Staff, 
@@ -15,85 +14,6 @@ import {
   FeatureRequest, 
   Test 
 } from '../types';
-
-// Mock organizations data
-export const organizations: Organization[] = [
-  {
-    id: 'ORG001',
-    name: 'Metro Health System',
-    type: 'Hospital Network',
-    status: 'Active',
-    phone: '(555) 123-4567',
-    email: 'admin@metrohealth.com',
-    address: '123 Medical Center Dr, City, ST 12345',
-    locationCount: 5,
-    providerCount: 23,
-    patientCount: 1247,
-    staffCount: 45,
-    joinDate: '2023-01-15',
-    website: 'www.metrohealthsystem.org',
-    salesRep: 'Jennifer Adams',
-    salesRepEmail: 'jennifer.adams@labsystem.com',
-    salesRepPhone: '(555) 987-6543',
-    accountManager: 'Sarah Johnson',
-    contractStatus: 'Active',
-    contractRenewal: '2024-12-31',
-    lastInteraction: '2024-01-10',
-    billingContact: 'Robert Wilson',
-    billingEmail: 'billing@metrohealth.com',
-    billingPhone: '(555) 123-4568'
-  },
-  {
-    id: 'ORG002',
-    name: 'Community Care Clinics',
-    type: 'Clinic Chain',
-    status: 'Active',
-    phone: '(555) 234-5678',
-    email: 'info@communitycare.com',
-    address: '456 Health Ave, City, ST 12345',
-    locationCount: 12,
-    providerCount: 67,
-    patientCount: 3421,
-    staffCount: 89,
-    joinDate: '2023-03-22',
-    website: 'www.communitycareclinics.org',
-    salesRep: 'Michael Chen',
-    salesRepEmail: 'michael.chen@labsystem.com',
-    salesRepPhone: '(555) 876-5432',
-    accountManager: 'David Wilson',
-    contractStatus: 'Renewal Pending',
-    contractRenewal: '2024-02-28',
-    lastInteraction: '2024-01-12',
-    billingContact: 'Maria Garcia',
-    billingEmail: 'billing@communitycare.com',
-    billingPhone: '(555) 234-5679'
-  },
-  {
-    id: 'ORG003',
-    name: 'Regional Medical Group',
-    type: 'Medical Practice',
-    status: 'Active',
-    phone: '(555) 345-6789',
-    email: 'contact@regionalmed.com',
-    address: '789 Wellness Blvd, City, ST 12345',
-    locationCount: 3,
-    providerCount: 15,
-    patientCount: 892,
-    staffCount: 28,
-    joinDate: '2023-06-10',
-    website: 'www.regionalmedicalgroup.org',
-    salesRep: 'Lisa Thompson',
-    salesRepEmail: 'lisa.thompson@labsystem.com',
-    salesRepPhone: '(555) 765-4321',
-    accountManager: 'Jennifer Adams',
-    contractStatus: 'Active',
-    contractRenewal: '2024-06-30',
-    lastInteraction: '2024-01-05',
-    billingContact: 'James Miller',
-    billingEmail: 'billing@regionalmed.com',
-    billingPhone: '(555) 345-6780'
-  }
-];
 
 // Mock locations data
 export const locations: Location[] = [

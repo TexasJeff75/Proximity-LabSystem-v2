@@ -3,17 +3,28 @@
 // Organization related types
 export interface Organization {
   id: string;
+  org_code: string;
   name: string;
-  type: string;
-  status: string;
-  phone: string;
-  email: string;
-  address: string;
-  locationCount: number;
-  providerCount: number;
-  patientCount: number;
-  staffCount: number;
-  joinDate: string;
+  medical_director?: string | null;
+  clia?: string | null;
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  phone?: string | null;
+  fax?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  // Legacy fields for backward compatibility
+  type?: string;
+  status?: string;
+  email?: string;
+  address?: string;
+  locationCount?: number;
+  providerCount?: number;
+  patientCount?: number;
+  staffCount?: number;
+  joinDate?: string;
   website?: string;
   salesRep?: string;
   salesRepEmail?: string;

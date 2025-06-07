@@ -62,6 +62,53 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      organizations: {
+        Row: {
+          id: string
+          org_code: string
+          name: string
+          medical_director: string | null
+          clia: string | null
+          street: string | null
+          city: string | null
+          state: string | null
+          zip: string | null
+          phone: string | null
+          fax: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          org_code: string
+          name: string
+          medical_director?: string | null
+          clia?: string | null
+          street?: string | null
+          city?: string | null
+          state?: string | null
+          zip?: string | null
+          phone?: string | null
+          fax?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          org_code?: string
+          name?: string
+          medical_director?: string | null
+          clia?: string | null
+          street?: string | null
+          city?: string | null
+          state?: string | null
+          zip?: string | null
+          phone?: string | null
+          fax?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never

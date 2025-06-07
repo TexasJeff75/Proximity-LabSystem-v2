@@ -1,45 +1,9 @@
-import React, { useState } from 'react';
-import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIcon, PhoneIcon, MailIcon, EditIcon, TrashIcon, UsersIcon } from 'lucide-react';
-const organizations = [{
-  id: 'ORG001',
-  name: 'Metro Health System',
-  type: 'Hospital Network',
-  status: 'Active',
-  phone: '(555) 123-4567',
-  email: 'admin@metrohealth.com',
-  address: '123 Medical Center Dr, City, ST 12345',
-  locationCount: 5,
-  providerCount: 23,
-  patientCount: 1247,
-  staffCount: 45,
-  joinDate: '2023-01-15'
-}, {
-  id: 'ORG002',
-  name: 'Community Care Clinics',
-  type: 'Clinic Chain',
-  status: 'Active',
-  phone: '(555) 234-5678',
-  email: 'info@communitycare.com',
-  address: '456 Health Ave, City, ST 12345',
-  locationCount: 12,
-  providerCount: 67,
-  patientCount: 3421,
-  staffCount: 89,
-  joinDate: '2023-03-22'
-}, {
-  id: 'ORG003',
-  name: 'Regional Medical Group',
-  type: 'Medical Practice',
-  status: 'Active',
-  phone: '(555) 345-6789',
-  email: 'contact@regionalmed.com',
-  address: '789 Wellness Blvd, City, ST 12345',
-  locationCount: 3,
-  providerCount: 15,
-  patientCount: 892,
-  staffCount: 28,
-  joinDate: '2023-06-10'
-}];
+import React, { useState, useEffect } from 'react';
+import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIcon, PhoneIcon, MailIcon, EditIcon, TrashIcon, UsersIcon, RefreshCwIcon } from 'lucide-react';
+import { fetchOrganizations, Organization } from '../services/organizationService';
+
+// Keep existing mock data for locations, providers, and staff
+// These will be used until we implement those tables in Supabase
 const locations = [{
   id: 'LOC001',
   name: 'Metro Health Downtown',
@@ -81,6 +45,7 @@ const locations = [{
   type: 'Medical Office',
   status: 'Active'
 }];
+
 const providers = [{
   id: 'PROV001',
   name: 'Dr. Sarah Johnson',
@@ -122,6 +87,7 @@ const providers = [{
   email: 'lthompson@regionalmed.com',
   status: 'Active'
 }];
+
 const staff = [{
   id: 'STAFF001',
   name: 'Jennifer Adams',
@@ -159,12 +125,33 @@ const staff = [{
   email: 'jmiller@regionalmed.com',
   status: 'Active'
 }];
+
 export function Organizations() {
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState('organizations');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrg, setSelectedOrg] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    loadOrganizations();
+  }, []);
+
+  const loadOrganizations = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchOrganizations();
+      setOrganizations(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load organizations');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Active':
@@ -177,57 +164,102 @@ export function Organizations() {
         return 'bg-gray-100 text-gray-800';
     }
   };
-  const filteredOrganizations = organizations.filter(org => org.name.toLowerCase().includes(searchTerm.toLowerCase()) || org.id.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const filteredOrganizations = organizations.filter(org => 
+    org.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    org.org_code.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const filteredLocations = locations.filter(location => {
-    const matchesSearch = location.name.toLowerCase().includes(searchTerm.toLowerCase()) || location.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = location.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         location.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesOrg = selectedOrg === 'All' || location.orgId === selectedOrg;
     return matchesSearch && matchesOrg;
   });
+
   const filteredProviders = providers.filter(provider => {
-    const matchesSearch = provider.name.toLowerCase().includes(searchTerm.toLowerCase()) || provider.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = provider.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         provider.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesOrg = selectedOrg === 'All' || provider.orgId === selectedOrg;
     return matchesSearch && matchesOrg;
   });
+
   const filteredStaff = staff.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         member.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesOrg = selectedOrg === 'All' || member.orgId === selectedOrg;
     return matchesSearch && matchesOrg;
   });
+
   const getOrgName = (orgId: string) => {
     return organizations.find(org => org.id === orgId)?.name || 'Unknown';
   };
+
   // Paginate data
-  const paginateData = <T extends any,>(items: T[]) => {
+  const paginateData = <T extends any>(items: T[]) => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return items.slice(startIndex, endIndex);
   };
+
   // Calculate total pages
   const getTotalPages = (totalItems: number) => Math.ceil(totalItems / itemsPerPage);
+
   // Update filtered data with pagination
   const paginatedLocations = paginateData(filteredLocations);
   const paginatedProviders = paginateData(filteredProviders);
   const paginatedStaff = paginateData(filteredStaff);
+
   // Pagination controls component
-  const PaginationControls = ({
-    totalItems
-  }: {
-    totalItems: number;
-  }) => {
+  const PaginationControls = ({ totalItems }: { totalItems: number }) => {
     const totalPages = getTotalPages(totalItems);
-    return <div className="flex justify-between items-center p-4 border-t">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-300" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+    return (
+      <div className="flex justify-between items-center p-4 border-t">
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-300"
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
           Previous
         </button>
         <span className="text-sm text-gray-600">
           Page {currentPage} of {totalPages}
         </span>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-300" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-300"
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
           Next
         </button>
-      </div>;
+      </div>
+    );
   };
-  return <div className="p-6 w-full">
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <p className="text-red-800">Error: {error}</p>
+        <button 
+          onClick={loadOrganizations}
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 w-full">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -239,59 +271,85 @@ export function Organizations() {
             </p>
           </div>
           <div className="flex space-x-3">
+            <button
+              onClick={loadOrganizations}
+              disabled={loading}
+              className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-50 disabled:opacity-50"
+            >
+              <RefreshCwIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
             <button className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-50">
               <PlusIcon className="h-4 w-4" />
               <span>
-                Add{' '}
-                {selectedTab === 'organizations' ? 'Organization' : selectedTab === 'locations' ? 'Location' : selectedTab === 'providers' ? 'Provider' : 'Staff Member'}
+                Add {selectedTab === 'organizations' ? 'Organization' : 
+                     selectedTab === 'locations' ? 'Location' : 
+                     selectedTab === 'providers' ? 'Provider' : 'Staff Member'}
               </span>
             </button>
           </div>
         </div>
+
         {/* Tab Navigation */}
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
-            {[{
-            key: 'organizations',
-            label: 'Organizations',
-            icon: BuildingIcon
-          }, {
-            key: 'locations',
-            label: 'Locations',
-            icon: MapPinIcon
-          }, {
-            key: 'providers',
-            label: 'Providers',
-            icon: StethoscopeIcon
-          }, {
-            key: 'staff',
-            label: 'Staff',
-            icon: UsersIcon
-          }].map(tab => {
-            const Icon = tab.icon;
-            return <button key={tab.key} onClick={() => setSelectedTab(tab.key)} className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${selectedTab === tab.key ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+            {[
+              { key: 'organizations', label: 'Organizations', icon: BuildingIcon },
+              { key: 'locations', label: 'Locations', icon: MapPinIcon },
+              { key: 'providers', label: 'Providers', icon: StethoscopeIcon },
+              { key: 'staff', label: 'Staff', icon: UsersIcon }
+            ].map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setSelectedTab(tab.key)}
+                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                    selectedTab === tab.key
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
                   <Icon className="h-4 w-4" />
                   <span>{tab.label}</span>
-                </button>;
-          })}
+                </button>
+              );
+            })}
           </nav>
         </div>
+
         {/* Search and Filters */}
         <div className="flex space-x-4 mt-6">
           <div className="relative flex-1">
             <SearchIcon className="h-5 w-5 absolute left-3 top-3 text-gray-400" />
-            <input type="text" placeholder={`Search ${selectedTab}...`} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            <input
+              type="text"
+              placeholder={`Search ${selectedTab}...`}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          {selectedTab !== 'organizations' && <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value={selectedOrg} onChange={e => setSelectedOrg(e.target.value)}>
+          {selectedTab !== 'organizations' && (
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedOrg}
+              onChange={(e) => setSelectedOrg(e.target.value)}
+            >
               <option value="All">All Organizations</option>
-              {organizations.map(org => <option key={org.id} value={org.id}>
+              {organizations.map(org => (
+                <option key={org.id} value={org.id}>
                   {org.name}
-                </option>)}
-            </select>}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
+
       {/* Organizations Tab */}
-      {selectedTab === 'organizations' && <div className="bg-white rounded-lg shadow-sm border">
+      {selectedTab === 'organizations' && (
+        <div className="bg-white rounded-lg shadow-sm border">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
@@ -300,25 +358,16 @@ export function Organizations() {
                     Organization
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
+                    Medical Director
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    CLIA
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Address
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Locations
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Providers
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Patients
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Staff
-                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Contact
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -326,7 +375,8 @@ export function Organizations() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredOrganizations.map(org => <tr key={org.id} className="hover:bg-gray-50">
+                {filteredOrganizations.map(org => (
+                  <tr key={org.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -339,63 +389,42 @@ export function Organizations() {
                             {org.name}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {org.id} • {org.type}
+                            {org.org_code}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <PhoneIcon className="h-4 w-4" />
-                          <span>{org.phone}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                          <MailIcon className="h-4 w-4" />
-                          <span>{org.email}</span>
-                        </div>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {org.medical_director || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {org.clia || '-'}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <MapPinIcon className="h-4 w-4 flex-shrink-0" />
-                        <span>
-                          {org.address.split(',').slice(-2, -1)[0].trim()}
-                        </span>
+                      <div className="text-sm text-gray-900">
+                        {org.street && (
+                          <div>{org.street}</div>
+                        )}
+                        {(org.city || org.state || org.zip) && (
+                          <div className="text-gray-500">
+                            {[org.city, org.state, org.zip].filter(Boolean).join(', ')}
+                          </div>
+                        )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {org.locationCount}
-                      </p>
-                      <p className="text-xs text-gray-600">Locations</p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {org.providerCount}
-                      </p>
-                      <p className="text-xs text-gray-600">Providers</p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {org.patientCount}
-                      </p>
-                      <p className="text-xs text-gray-600">Patients</p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {org.staffCount}
-                      </p>
-                      <p className="text-xs text-gray-600">Staff</p>
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="space-y-2">
-                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(org.status)}`}>
-                          {org.status}
-                        </span>
-                        <div className="text-xs text-gray-500">
-                          Joined: {org.joinDate}
-                        </div>
+                      <div className="space-y-1">
+                        {org.phone && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <PhoneIcon className="h-4 w-4" />
+                            <span>{org.phone}</span>
+                          </div>
+                        )}
+                        {org.fax && (
+                          <div className="text-sm text-gray-600">
+                            Fax: {org.fax}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -409,16 +438,22 @@ export function Organizations() {
                         </button>
                       </div>
                     </td>
-                  </tr>)}
+                  </tr>
+                ))}
               </tbody>
             </table>
-            {filteredOrganizations.length === 0 && <div className="text-center py-8 text-gray-500">
+            {filteredOrganizations.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
                 No organizations match the current filters
-              </div>}
+              </div>
+            )}
           </div>
-        </div>}
+        </div>
+      )}
+
       {/* Locations Tab */}
-      {selectedTab === 'locations' && <div className="bg-white rounded-lg shadow-sm border">
+      {selectedTab === 'locations' && (
+        <div className="bg-white rounded-lg shadow-sm border">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
@@ -441,7 +476,8 @@ export function Organizations() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedLocations.map(location => <tr key={location.id} className="hover:bg-gray-50">
+                {paginatedLocations.map(location => (
+                  <tr key={location.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -480,16 +516,24 @@ export function Organizations() {
                         {location.status}
                       </span>
                     </td>
-                  </tr>)}
+                  </tr>
+                ))}
               </tbody>
             </table>
-            {filteredLocations.length === 0 ? <div className="text-center py-8 text-gray-500">
+            {filteredLocations.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
                 No locations match the current filters
-              </div> : <PaginationControls totalItems={filteredLocations.length} />}
+              </div>
+            ) : (
+              <PaginationControls totalItems={filteredLocations.length} />
+            )}
           </div>
-        </div>}
+        </div>
+      )}
+
       {/* Providers Tab */}
-      {selectedTab === 'providers' && <div className="bg-white rounded-lg shadow-sm border">
+      {selectedTab === 'providers' && (
+        <div className="bg-white rounded-lg shadow-sm border">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
@@ -512,7 +556,8 @@ export function Organizations() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedProviders.map(provider => <tr key={provider.id} className="hover:bg-gray-50">
+                {paginatedProviders.map(provider => (
+                  <tr key={provider.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -551,16 +596,24 @@ export function Organizations() {
                         {provider.status}
                       </span>
                     </td>
-                  </tr>)}
+                  </tr>
+                ))}
               </tbody>
             </table>
-            {filteredProviders.length === 0 ? <div className="text-center py-8 text-gray-500">
+            {filteredProviders.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
                 No providers match the current filters
-              </div> : <PaginationControls totalItems={filteredProviders.length} />}
+              </div>
+            ) : (
+              <PaginationControls totalItems={filteredProviders.length} />
+            )}
           </div>
-        </div>}
+        </div>
+      )}
+
       {/* Staff Tab */}
-      {selectedTab === 'staff' && <div className="bg-white rounded-lg shadow-sm border">
+      {selectedTab === 'staff' && (
+        <div className="bg-white rounded-lg shadow-sm border">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
@@ -586,7 +639,8 @@ export function Organizations() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedStaff.map(member => <tr key={member.id} className="hover:bg-gray-50">
+                {paginatedStaff.map(member => (
+                  <tr key={member.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -628,13 +682,20 @@ export function Organizations() {
                         {member.status}
                       </span>
                     </td>
-                  </tr>)}
+                  </tr>
+                ))}
               </tbody>
             </table>
-            {filteredStaff.length === 0 ? <div className="text-center py-8 text-gray-500">
+            {filteredStaff.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
                 No staff members match the current filters
-              </div> : <PaginationControls totalItems={filteredStaff.length} />}
+              </div>
+            ) : (
+              <PaginationControls totalItems={filteredStaff.length} />
+            )}
           </div>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 }
