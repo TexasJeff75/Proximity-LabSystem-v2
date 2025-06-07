@@ -1,6 +1,7 @@
 import React, { useState, Component } from 'react';
-import { FileTextIcon, EditIcon, CopyIcon, PlusIcon, SearchIcon, ClipboardListIcon, UsersIcon, LockIcon, ShieldIcon, TrashIcon, AlertCircleIcon, LightbulbIcon, FilterIcon, XIcon, CheckIcon, CodeIcon } from 'lucide-react';
+import { FileTextIcon, EditIcon, CopyIcon, PlusIcon, SearchIcon, ClipboardListIcon, UsersIcon, LockIcon, ShieldIcon, TrashIcon, AlertCircleIcon, LightbulbIcon, FilterIcon, XIcon, CheckIcon, CodeIcon, UploadIcon, DatabaseIcon } from 'lucide-react';
 import { developmentLog } from '../utils/mockData';
+import { importTestMethodsAndPanels, ImportResult } from '../utils/dataImporter';
 
 // Mock roles and permissions data
 const roles = [{
@@ -539,6 +540,10 @@ export function Settings() {
   const [devLogTypeFilter, setDevLogTypeFilter] = useState('All');
   const [devLogStatusFilter, setDevLogStatusFilter] = useState('All');
 
+  // Data import state
+  const [importStatus, setImportStatus] = useState<'idle' | 'importing' | 'success' | 'error'>('idle');
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+
   const filteredTests = tests.filter(test => {
     const matchesSearch = test.name.toLowerCase().includes(searchTerm.toLowerCase()) || test.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'All' || test.category === categoryFilter;
@@ -628,6 +633,47 @@ export function Settings() {
       priority: 'Medium'
     });
   };
+
+  // Handle file import
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith('.txt') && !file.name.endsWith('.tsv')) {
+      setImportStatus('error');
+      setImportResult({
+        success: false,
+        message: 'Please select a .txt or .tsv file',
+        testMethodsCount: 0,
+        testPanelsCount: 0
+      });
+      return;
+    }
+
+    setImportStatus('importing');
+    setImportResult(null);
+
+    try {
+      const fileContent = await file.text();
+      const result = await importTestMethodsAndPanels(fileContent);
+      
+      setImportResult(result);
+      setImportStatus(result.success ? 'success' : 'error');
+      
+      // Clear the file input
+      event.target.value = '';
+    } catch (error) {
+      setImportStatus('error');
+      setImportResult({
+        success: false,
+        message: `Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        testMethodsCount: 0,
+        testPanelsCount: 0
+      });
+    }
+  };
+
   // Admin access denied view
   const AdminAccessDenied = () => <div className="bg-red-50 border border-red-200 rounded-lg p-6 flex flex-col items-center justify-center text-center">
       <AlertCircleIcon className="h-12 w-12 text-red-500 mb-4" />
@@ -652,6 +698,10 @@ export function Settings() {
         <nav className="flex space-x-8">
           <button onClick={() => setActiveTab('tests')} className={`py-4 px-1 font-medium text-sm border-b-2 ${activeTab === 'tests' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
             Test Management
+          </button>
+          <button onClick={() => setActiveTab('data-import')} className={`py-4 px-1 font-medium text-sm border-b-2 flex items-center ${activeTab === 'data-import' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+            <DatabaseIcon className="h-4 w-4 mr-2" />
+            Data Import
           </button>
           <button onClick={() => setActiveTab('features')} className={`py-4 px-1 font-medium text-sm border-b-2 flex items-center ${activeTab === 'features' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
             <LightbulbIcon className="h-4 w-4 mr-2" />
@@ -759,6 +809,135 @@ export function Settings() {
             </div>
           </div>
         </div>}
+
+      {/* Data Import Tab */}
+      {activeTab === 'data-import' && <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">
+                Data Import
+              </h2>
+              <p className="text-gray-600">
+                Import test methods and panels from external data sources
+              </p>
+            </div>
+          </div>
+
+          {/* Test Methods and Panels Import */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center mb-4">
+              <DatabaseIcon className="h-6 w-6 text-blue-600 mr-3" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Test Methods & Panels Import
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Import test methods and their associated panels from a tab-separated file
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload File
+                </label>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="file"
+                    accept=".txt,.tsv"
+                    onChange={handleFileImport}
+                    disabled={importStatus === 'importing'}
+                    className="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-lg file:border-0
+                      file:text-sm file:font-medium
+                      file:bg-blue-50 file:text-blue-700
+                      hover:file:bg-blue-100
+                      disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  {importStatus === 'importing' && (
+                    <div className="flex items-center space-x-2 text-blue-600">
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="text-sm">Importing...</span>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Expected format: Tab-separated file with columns: Organization Code, Test Method Code, Test Method Name, Panel Code, Panel Name
+                </p>
+              </div>
+
+              {/* Import Status */}
+              {importResult && (
+                <div className={`p-4 rounded-lg border ${
+                  importResult.success 
+                    ? 'bg-green-50 border-green-200' 
+                    : 'bg-red-50 border-red-200'
+                }`}>
+                  <div className="flex items-start">
+                    {importResult.success ? (
+                      <CheckIcon className="h-5 w-5 text-green-600 mt-0.5 mr-3" />
+                    ) : (
+                      <AlertCircleIcon className="h-5 w-5 text-red-600 mt-0.5 mr-3" />
+                    )}
+                    <div className="flex-1">
+                      <p className={`text-sm font-medium ${
+                        importResult.success ? 'text-green-800' : 'text-red-800'
+                      }`}>
+                        {importResult.message}
+                      </p>
+                      
+                      {importResult.success && (
+                        <div className="mt-2 text-sm text-green-700">
+                          <p>• Test Methods: {importResult.testMethodsCount}</p>
+                          <p>• Test Panels: {importResult.testPanelsCount}</p>
+                        </div>
+                      )}
+
+                      {importResult.errors && importResult.errors.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm font-medium text-yellow-800 mb-2">
+                            Warnings ({importResult.errors.length}):
+                          </p>
+                          <div className="max-h-32 overflow-y-auto">
+                            {importResult.errors.slice(0, 5).map((error, index) => (
+                              <p key={index} className="text-xs text-yellow-700">
+                                • {error}
+                              </p>
+                            ))}
+                            {importResult.errors.length > 5 && (
+                              <p className="text-xs text-yellow-600 mt-1">
+                                ... and {importResult.errors.length - 5} more warnings
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* File Format Example */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-gray-900 mb-2">
+                  Expected File Format Example:
+                </h4>
+                <pre className="text-xs text-gray-700 overflow-x-auto">
+{`Organization Code	Test Method Code	Test Method Name	Panel Code	Panel Name
+AMMO	PCR Testing	PCR Testing	HPV	Human Papillomavirus (HPV)
+AMMO	PCR Testing	PCR Testing	UTI	UTI
+AMMO	AMA Confirmation	AMA Confirmation	FCONFM	Full Confirmation - Specimen Type Urine`}
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>}
+
       {/* Feature Requests Tab */}
       {activeTab === 'features' && <div className="space-y-6">
           <div className="flex justify-between items-center">
