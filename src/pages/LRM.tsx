@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SearchIcon, PlusIcon, BuildingIcon, MapPinIcon, UserIcon, StethoscopeIcon, PhoneIcon, MailIcon, EditIcon, TrashIcon, UsersIcon, RefreshCwIcon, XIcon, SaveIcon, HeartHandshakeIcon, CalendarIcon, DollarSignIcon, FileTextIcon, TrendingUpIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon } from 'lucide-react';
 import { fetchOrganizationsWithReps, OrganizationWithReps } from '../services/organizationService';
 import { fetchLocationsWithOrganizations, LocationWithOrganization } from '../services/locationService';
+import { LocationsModal } from '../components/LocationsModal';
 
 // Mock data for interactions, contracts, and other LRM-specific data
 const interactions = [
@@ -82,6 +83,7 @@ export function LRM() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrg, setSelectedOrg] = useState<OrganizationWithReps | null>(null);
   const [showNewInteractionModal, setShowNewInteractionModal] = useState(false);
+  const [showLocationsModal, setShowLocationsModal] = useState<{ organizationId: string; organizationName: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -196,6 +198,13 @@ export function LRM() {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleLocationsClick = (org: OrganizationWithReps) => {
+    setShowLocationsModal({
+      organizationId: org.id,
+      organizationName: org.name
+    });
   };
 
   if (loading) {
@@ -394,12 +403,15 @@ export function LRM() {
                       {org.clia || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
+                      <button
+                        onClick={() => handleLocationsClick(org)}
+                        className="flex items-center hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                      >
                         <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" />
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-medium text-blue-600 hover:text-blue-800">
                           {org.location_count || 0}
                         </span>
-                      </div>
+                      </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -990,6 +1002,15 @@ export function LRM() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Locations Modal */}
+      {showLocationsModal && (
+        <LocationsModal
+          organizationId={showLocationsModal.organizationId}
+          organizationName={showLocationsModal.organizationName}
+          onClose={() => setShowLocationsModal(null)}
+        />
       )}
     </div>
   );
